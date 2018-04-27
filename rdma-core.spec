@@ -7,7 +7,7 @@ Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
 Version:	17.1
-Release:	1
+Release:	2
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
@@ -723,8 +723,8 @@ połączeniami RDMA) w przestrzeni użytkownika.
 Summary:	Header files for librdmacm library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki librdmacm
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
 Requires:	libibverbs-devel = %{version}-%{release}
+Requires:	librdmacm = %{version}-%{release}
 Requires:	linux-libc-headers >= 7:2.6.20
 
 %description -n librdmacm-devel
