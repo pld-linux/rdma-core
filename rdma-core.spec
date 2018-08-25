@@ -6,13 +6,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	17.1
-Release:	2
+Version:	19
+Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	1d19caf554f815990af5c21356ac4d3a
+# Source0-md5:	d418ed9d2ff16fc8728b75eadce60c78
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 URL:		https://github.com/linux-rdma/rdma-core
@@ -34,7 +34,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav17
+%define		ibv_abi		rdmav19
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -954,11 +954,13 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libibverbs.so
 %dir %{_includedir}/infiniband
 %{_includedir}/infiniband/arch.h
+%{_includedir}/infiniband/ib_user_ioctl_verbs.h
 %{_includedir}/infiniband/opcode.h
 %{_includedir}/infiniband/sa.h
 %{_includedir}/infiniband/sa-kern-abi.h
 %{_includedir}/infiniband/tm_types.h
 %{_includedir}/infiniband/verbs.h
+%{_includedir}/infiniband/verbs_api.h
 %{_pkgconfigdir}/ibverbs.pc
 %{_mandir}/man3/ibv_*.3*
 %{_mandir}/man3/mbps_to_ibv_rate.3*
@@ -1091,6 +1093,8 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-mlx5-devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libmlx5.so
+%{_includedir}/infiniband/mlx5_api.h
+%{_includedir}/infiniband/mlx5_user_ioctl_verbs.h
 %{_includedir}/infiniband/mlx5dv.h
 %{_mandir}/man3/mlx5dv_*.3*
 %{_mandir}/man7/mlx5dv.7*
