@@ -6,15 +6,16 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	19
+Version:	21
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	d418ed9d2ff16fc8728b75eadce60c78
+# Source0-md5:	6ee01e03ccefee9f8a7d7680ce85b551
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
+Patch0:		%{name}-static.patch
 URL:		https://github.com/linux-rdma/rdma-core
 BuildRequires:	cmake >= 2.8.11
 BuildRequires:	libnl-devel >= 3.2
@@ -34,7 +35,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav19
+%define		ibv_abi		rdmav21
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -862,12 +863,16 @@ InfiniBand.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 install -d build
 cd build
+# .pc files generation expect INCLUDEDIR and LIBDIR relative to PREFIX
 %cmake .. \
+	-DCMAKE_INSTALL_INCLUDEDIR=include \
 	-DCMAKE_INSTALL_INITDDIR=/etc/rc.d/init.d \
+	-DCMAKE_INSTALL_LIBDIR=%{_lib} \
 	-DCMAKE_INSTALL_SYSTEMD_SERVICEDIR=%{systemdunitdir} \
 	-DCMAKE_INSTALL_UDEV_RULESDIR=/lib/udev/rules.d \
 	%{?with_static_libs:-DENABLE_STATIC=ON}
@@ -881,6 +886,7 @@ install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+# TODO: drop when other packages switch to upstream compatible lib{ibverbs,rdmacm}.pc
 # check if not present already
 [ ! -f $RPM_BUILD_ROOT%{_pkgconfigdir}/ibverbs.pc ] || exit 1
 sed -e 's,@prefix@,%{_prefix},;
@@ -961,6 +967,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/infiniband/tm_types.h
 %{_includedir}/infiniband/verbs.h
 %{_includedir}/infiniband/verbs_api.h
+%{_pkgconfigdir}/libibverbs.pc
+# backward compat
 %{_pkgconfigdir}/ibverbs.pc
 %{_mandir}/man3/ibv_*.3*
 %{_mandir}/man3/mbps_to_ibv_rate.3*
@@ -985,7 +993,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-bnxt_re-static
 %defattr(644,root,root,755)
-%{_libdir}/libbnxt_re.a
+%{_libdir}/libbnxt_re-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-cxgb3
@@ -996,7 +1004,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-cxgb3-static
 %defattr(644,root,root,755)
-%{_libdir}/libcxgb3.a
+%{_libdir}/libcxgb3-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-cxgb4
@@ -1007,7 +1015,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-cxgb4-static
 %defattr(644,root,root,755)
-%{_libdir}/libcxgb4.a
+%{_libdir}/libcxgb4-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-hfi1verbs
@@ -1018,7 +1026,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-hfi1verbs-static
 %defattr(644,root,root,755)
-%{_libdir}/libhfi1verbs.a
+%{_libdir}/libhfi1verbs-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-hns
@@ -1029,7 +1037,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-hns-static
 %defattr(644,root,root,755)
-%{_libdir}/libhns.a
+%{_libdir}/libhns-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-i40iw
@@ -1040,7 +1048,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-i40iw-static
 %defattr(644,root,root,755)
-%{_libdir}/libi40iw.a
+%{_libdir}/libi40iw-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-ipathverbs
@@ -1053,7 +1061,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-ipathverbs-static
 %defattr(644,root,root,755)
-%{_libdir}/libipathverbs.a
+%{_libdir}/libipathverbs-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-mlx4
@@ -1071,6 +1079,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libmlx4.so
 %{_includedir}/infiniband/mlx4dv.h
+%{_pkgconfigdir}/libmlx4.pc
 %{_mandir}/man3/mlx4dv_*.3*
 %{_mandir}/man7/mlx4dv.7*
 
@@ -1096,6 +1105,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/infiniband/mlx5_api.h
 %{_includedir}/infiniband/mlx5_user_ioctl_verbs.h
 %{_includedir}/infiniband/mlx5dv.h
+%{_pkgconfigdir}/libmlx5.pc
 %{_mandir}/man3/mlx5dv_*.3*
 %{_mandir}/man7/mlx5dv.7*
 
@@ -1113,7 +1123,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-mthca-static
 %defattr(644,root,root,755)
-%{_libdir}/libmthca.a
+%{_libdir}/libmthca-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-nes
@@ -1124,7 +1134,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-nes-static
 %defattr(644,root,root,755)
-%{_libdir}/libnes.a
+%{_libdir}/libnes-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-ocrdma
@@ -1135,7 +1145,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-ocrdma-static
 %defattr(644,root,root,755)
-%{_libdir}/libocrdma.a
+%{_libdir}/libocrdma-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-qedr
@@ -1146,7 +1156,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-qedr-static
 %defattr(644,root,root,755)
-%{_libdir}/libqedr.a
+%{_libdir}/libqedr-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-rxe
@@ -1161,7 +1171,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-rxe-static
 %defattr(644,root,root,755)
-%{_libdir}/librxe.a
+%{_libdir}/librxe-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-vmw_pvrdma
@@ -1172,7 +1182,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with static_libs}
 %files -n libibverbs-driver-vmw_pvrdma-static
 %defattr(644,root,root,755)
-%{_libdir}/libvmw_pvrdma.a
+%{_libdir}/libvmw_pvrdma-%{ibv_abi}.a
 %endif
 
 %files -n librdmacm
@@ -1191,6 +1201,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/rdma/rdma_cma_abi.h
 %{_includedir}/rdma/rdma_verbs.h
 %{_includedir}/rdma/rsocket.h
+%{_pkgconfigdir}/librdmacm.pc
+# backward compat
 %{_pkgconfigdir}/rdmacm.pc
 %{_mandir}/man3/rdma_*.3*
 %{_mandir}/man7/rdma_cm.7*
@@ -1240,6 +1252,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libibumad.so
 %{_includedir}/infiniband/umad*.h
+%{_pkgconfigdir}/libibumad.pc
 %{_mandir}/man3/umad_*.3*
 
 %if %{with static_libs}
