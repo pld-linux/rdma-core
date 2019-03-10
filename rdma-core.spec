@@ -6,13 +6,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	21
+Version:	22.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	6ee01e03ccefee9f8a7d7680ce85b551
+# Source0-md5:	dde4d30e3db20893408ae51041117034
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -22,7 +22,11 @@ BuildRequires:	libnl-devel >= 3.2
 # <rdma/*> kernel interface
 BuildRequires:	linux-libc-headers >= 7:2.6.20
 BuildRequires:	pkgconfig
-BuildRequires:	python >= 2
+BuildRequires:	python3 >= 1:3
+%if %{with python}
+BuildRequires:	python3-Cython
+BuildRequires:	python3-devel >= 1:3.2
+%endif
 BuildRequires:	rpmbuild(macros) >= 1.605
 BuildRequires:	udev-devel
 BuildRequires:	systemd-devel
@@ -35,7 +39,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav21
+%define		ibv_abi		rdmav22
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -861,6 +865,20 @@ W połączeniu ze sterownikiem jądra ib_srp, srptools pozwalają na
 wykrywanie i używanie urządzeń SCSI poprzez protokół SCSI RDMA po
 InfiniBand.
 
+%package -n python3-pyverbs
+Summary:	Python 3 API over IB verbs
+Summary(pl.UTF-8):	API Pythona 3 do IB verbs
+Group:		Libraries/Python
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n python3-pyverbs
+Pyverbs is a Cython-based Python API over libibverbs, providing an
+easy, object-oriented access to IB verbs.
+
+%description -n python3-pyverbs -l pl.UTF-8
+Pyverbs to oparte na Cythonie API Pythona do libibverbs, zapewniające
+łatwy, zorientowany obiektowo dostęp do IB verbs.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -875,16 +893,28 @@ cd build
 	-DCMAKE_INSTALL_LIBDIR=%{_lib} \
 	-DCMAKE_INSTALL_SYSTEMD_SERVICEDIR=%{systemdunitdir} \
 	-DCMAKE_INSTALL_UDEV_RULESDIR=/lib/udev/rules.d \
-	%{?with_static_libs:-DENABLE_STATIC=ON}
+	%{?with_static_libs:-DENABLE_STATIC=ON} \
+%if %{with python}
+	-DNO_PYVERBS=OFF \
+	-DPYTHON_EXECUTABLE:PATH=%{__python3}
+%else
+	-DNO_PYVERBS=ON
+%endif
 
 %{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
+#install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
 
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+%if %{with python}
+%{__rm} -r $RPM_BUILD_ROOT%{py3_sitedir}/pyverbs/{tests,run_tests.py}
+%py3_comp $RPM_BUILD_ROOT%{py3_sitedir}/pyverbs
+%py3_ocomp $RPM_BUILD_ROOT%{py3_sitedir}/pyverbs
+%endif
 
 # TODO: drop when other packages switch to upstream compatible lib{ibverbs,rdmacm}.pc
 # check if not present already
@@ -1311,3 +1341,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/srp_daemon.1*
 %{_mandir}/man5/srp_daemon.service.5*
 %{_mandir}/man5/srp_daemon_port@.service.5*
+
+%if %{with python}
+%files -n python3-pyverbs
+%defattr(644,root,root,755)
+%dir %{py3_sitedir}/pyverbs
+%attr(755,root,root) %{py3_sitedir}/pyverbs/*.cpython-*.so
+%{py3_sitedir}/pyverbs/*.py
+%{py3_sitedir}/pyverbs/__pycache__
+%endif
