@@ -6,21 +6,24 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	23
+Version:	25.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	c78575735c4a71609c1a214ea16cd8dc
+# Source0-md5:	960e3db6342225d2d83a683295befd4a
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
 URL:		https://github.com/linux-rdma/rdma-core
 BuildRequires:	cmake >= 2.8.11
+BuildRequires:	docutils
 BuildRequires:	libnl-devel >= 3.2
 # <rdma/*> kernel interface
 BuildRequires:	linux-libc-headers >= 7:2.6.20
+# if no buildlib/pandoc-prebuilt dir
+#BuildRequires:	pandoc
 BuildRequires:	pkgconfig
 BuildRequires:	python3 >= 1:3
 %if %{with python}
@@ -39,7 +42,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav22
+%define		ibv_abi		rdmav25
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -271,6 +274,62 @@ application.
 %description -n libibverbs-driver-cxgb4-static -l pl.UTF-8
 Statyczna wersja sterownika cxgb4, którą można wbudować bezpośrednio w
 aplikację.
+
+%package -n libibverbs-driver-efa
+Summary:	Userspace driver for the Amazon Elastic Fabric Adapters
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla urządzeń Amazon Elastic Fabric Adapter
+Group:		Libraries
+Requires:	libibverbs-driver-efa-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-efa
+libefa is a userspace driver for Amazon Elastic Fabric Adapters. It
+works as a plug-in module for libibverbs that allows programs to
+use Amazon hardware directly from userspace.
+
+%description -n libibverbs-driver-efa -l pl.UTF-8
+libefa to sterownik przestrzeni użytkownika dla urządzeń Amazon
+Elastic Fabric Adapter. Działa jako moduł ładowany przez libibverbs,
+pozwalający programom na dostęp z przestrzeni użytkownika do sprzętu
+Amazona.
+
+%package -n libibverbs-driver-efa-libs
+Summary:	Shared library for the Amazon Elastic Fabric Adapters
+Summary(pl.UTF-8):	Biblioteka współdzielona dla urządzeń Amazon Elastic Fabric Adapter
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-efa-libs
+Shared library for the Amazon Elastic Fabric Adapters.
+
+%description -n libibverbs-driver-efa-libs -l pl.UTF-8
+Biblioteka współdzielona dla urządzeń Amazon Elastic Fabric Adapter.
+
+%package -n libibverbs-driver-efa-devel
+Summary:	Header file for the Amazon Elastic Fabric Adapters library
+Summary(pl.UTF-8):	Plik nagłówkowy biblioteki dla urządzeń Amazon Elastic Fabric Adapter
+Group:		Development/Libraries
+Requires:	libibverbs-devel = %{version}-%{release}
+Requires:	libibverbs-driver-efa-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-efa-devel
+Header file for the Amazon Elastic Fabric Adapters library.
+
+%description -n libibverbs-driver-efa-devel -l pl.UTF-8
+Plik nagłówkowy biblioteki dla urządzeń Amazon Elastic Fabric Adapter.
+
+%package -n libibverbs-driver-efa-static
+Summary:	Static version of efa driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika efa
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+
+%description -n libibverbs-driver-efa-static
+Static version of efa driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-efa-static -l pl.UTF-8
+Statyczna wersja sterownika efa, którą można wbudować bezpośrednio
+w aplikację.
 
 %package -n libibverbs-driver-hfi1verbs
 Summary:	Userspace driver for Intel OPA Gen1 adapters
@@ -680,6 +739,32 @@ application.
 Statyczna wersja sterownika rxe, którą można wbudować bezpośrednio w
 aplikację.
 
+%package -n libibverbs-driver-siw
+Summary:	Userspace driver for software iWarp protocol
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla programowego protokołu iWarp
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-siw
+Userspace driver for software iWarp protocol.
+
+%description -n libibverbs-driver-siw -l pl.UTF-8
+Sterownik przestrzeni użytkownika dla programowego protokołu iWarp.
+
+%package -n libibverbs-driver-siw-static
+Summary:	Static version of siw driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika siw
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+
+%description -n libibverbs-driver-siw-static
+Static version of siw driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-siw-static -l pl.UTF-8
+Statyczna wersja sterownika siw, którą można wbudować bezpośrednio w
+aplikację.
+
 %package -n libibverbs-driver-vmw_pvrdma
 Summary:	Userspace driver for the VMware Paravirtual RDMA devices
 Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla urządzeń VMware Paravirtual RDMA
@@ -803,6 +888,47 @@ This package contains the static libibumad library.
 %description -n libibumad-static -l pl.UTF-8
 Ten pakiet zawiera statyczną bibliotekę libibumad.
 
+%package -n libibmad
+Summary:	OpenFabrics Alliance InfiniBand MAD library
+Summary(pl.UTF-8):	Biblioteka OpenFabrics Alliance InfiniBand MAD
+Group:		Libraries
+Requires:	libibumad = %{version}-%{release}
+
+%description -n libibmad
+libibmad provides low layer InfiniBand functions for use by the IB
+diagnostic and management programs. These include MAD, SA, SMP, and
+other basic IB functions.
+
+%description -n libibmad -l pl.UTF-8
+libibmad to biblioteka udostępniająca niskopoziomowe funkcje
+InfiniBand przeznaczone dla programów diagnostycznych i zarządzających
+IB. Obejmuje MAD, SA, SMP i inne podstawowe funkcje IB.
+
+%package -n libibmad-devel
+Summary:	Header files for libibmad library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki libibmad
+Group:		Development/Libraries
+Requires:	libibmad = %{version}-%{release}
+Requires:	libibumad-devel = %{version}-%{release}
+
+%description -n libibmad-devel
+Header files for libibmad library.
+
+%description -n libibmad-devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki libibmad.
+
+%package -n libibmad-static
+Summary:	Static libibmad library
+Summary(pl.UTF-8):	Statyczna biblioteka libibmad
+Group:		Development/Libraries
+Requires:	libibmad-devel = %{version}-%{release}
+
+%description -n libibmad-static
+This package contains the static libibmad library.
+
+%description -n libibmad-static -l pl.UTF-8
+Ten pakiet zawiera statyczną bibliotekę libibmad.
+
 %package -n ibacm
 Summary:	InfiniBand Communication Manager Assistant
 Summary(pl.UTF-8):	Asystent zarządzania komunikacją InfiniBand
@@ -827,6 +953,59 @@ Header files for IB ACM service.
 
 %description -n ibacm-devel -l pl.UTF-8
 Pliki nagłówkowe usługi IB ACM.
+
+%package -n infiniband-diags
+Summary:	InfiniBand diagnostic tools
+Summary(pl.UTF-8):	Narzędzia diagnostyczne InfiniBand
+Group:		Networking/Utilities
+Requires:	infiniband-diags-libs = %{version}-%{release}
+
+%description -n infiniband-diags
+This package provides InfiniBand diagnostic programs and scripts
+needed to diagnose an IB subnet.
+
+%description -n infiniband-diags -l pl.UTF-8
+Ten pakiet zawiera programy i skrypty diagnostyczne InfiniBand
+potrzebne do diagnostyki podsieci IB.
+
+%package -n infiniband-diags-libs
+Summary:	InfiniBand diagnostic library
+Summary(pl.UTF-8):	Biblioteka diagnostyczna InfiniBand
+Group:		Libraries
+Requires:	libibmad = %{version}-%{release}
+Requires:	libibumad = %{version}-%{release}
+
+%description -n infiniband-diags-libs
+InfiniBand diagnostic library.
+
+%description -n infiniband-diags-libs -l pl.UTF-8
+Biblioteka diagnostyczna InfiniBand.
+
+%package -n infiniband-diags-devel
+Summary:	Header files for libibnetdisc library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki libibnetdisc
+Group:		Development/Libraries
+Requires:	infiniband-diags-libs = %{version}-%{release}
+Requires:	libibmad-devel = %{version}-%{release}
+Requires:	libibumad-devel = %{version}-%{release}
+
+%description -n infiniband-diags-devel
+Header files for libibnetdisc library.
+
+%description -n infiniband-diags-devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki libibnetdisc.
+
+%package -n infiniband-diags-static
+Summary:	Static libibnetdisc library
+Summary(pl.UTF-8):	Statyczna biblioteka libibnetdisc
+Group:		Development/Libraries
+Requires:	infiniband-diags-devel = %{version}-%{release}
+
+%description -n infiniband-diags-static
+Static libibnetdisc library.
+
+%description -n infiniband-diags-static -l pl.UTF-8
+Statyczna biblioteka libibnetdisc.
 
 %package -n iwpmd
 Summary:	iWarp Port Mapper userspace daemon
@@ -891,6 +1070,7 @@ cd build
 	-DCMAKE_INSTALL_INCLUDEDIR=include \
 	-DCMAKE_INSTALL_INITDDIR=/etc/rc.d/init.d \
 	-DCMAKE_INSTALL_LIBDIR=%{_lib} \
+	-DCMAKE_INSTALL_PERLDIR=%{perl_vendorlib} \
 	-DCMAKE_INSTALL_SYSTEMD_SERVICEDIR=%{systemdunitdir} \
 	-DCMAKE_INSTALL_UDEV_RULESDIR=/lib/udev/rules.d \
 	%{?with_static_libs:-DENABLE_STATIC=ON} \
@@ -936,6 +1116,9 @@ rm -rf $RPM_BUILD_ROOT
 %post	-n libibverbs -p /sbin/ldconfig
 %postun	-n libibverbs -p /sbin/ldconfig
 
+%post	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
+%postun	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
+
 %post	-n libibverbs-driver-mlx4-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-mlx4-libs -p /sbin/ldconfig
 
@@ -947,6 +1130,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %post	-n libibumad -p /sbin/ldconfig
 %postun	-n libibumad -p /sbin/ldconfig
+
+%post	-n libibmad -p /sbin/ldconfig
+%postun	-n libibmad -p /sbin/ldconfig
+
+%post	-n infiniband-diags-libs -p /sbin/ldconfig
+%postun	-n infiniband-diags-libs -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
@@ -964,6 +1153,8 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/rdma/modules/roce.conf
 %{systemdunitdir}/rdma-hw.target
 %{systemdunitdir}/rdma-load-modules@.service
+%attr(755,root,root) /lib/udev/rdma_rename
+/lib/udev/rules.d/60-rdma-persistent-naming.rules
 /lib/udev/rules.d/75-rdma-description.rules
 /lib/udev/rules.d/90-rdma-hw-modules.rules
 /lib/udev/rules.d/90-rdma-ulp-modules.rules
@@ -1046,6 +1237,30 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-cxgb4-static
 %defattr(644,root,root,755)
 %{_libdir}/libcxgb4-%{ibv_abi}.a
+%endif
+
+%files -n libibverbs-driver-efa
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibverbs/libefa-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/efa.driver
+
+%files -n libibverbs-driver-efa-libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libefa.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libefa.so.1
+
+%files -n libibverbs-driver-efa-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libefa.so
+%{_includedir}/infiniband/efadv.h
+%{_pkgconfigdir}/libefa.pc
+%{_mandir}/man3/efadv_create_driver_qp.3*
+%{_mandir}/man7/efadv.7*
+
+%if %{with static_libs}
+%files -n libibverbs-driver-efa-static
+%defattr(644,root,root,755)
+%{_libdir}/libefa.a
 %endif
 
 %files -n libibverbs-driver-hfi1verbs
@@ -1204,6 +1419,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/librxe-%{ibv_abi}.a
 %endif
 
+%files -n libibverbs-driver-siw
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibverbs/libsiw-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/siw.driver
+
+%if %{with static_libs}
+%files -n libibverbs-driver-siw-static
+%defattr(644,root,root,755)
+%{_libdir}/libsiw-%{ibv_abi}.a
+%endif
+
 %files -n libibverbs-driver-vmw_pvrdma
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libibverbs/libvmw_pvrdma-%{ibv_abi}.so
@@ -1291,6 +1517,24 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libibumad.a
 %endif
 
+%files -n libibmad
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibmad.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libibmad.so.5
+
+%files -n libibmad-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibmad.so
+%{_includedir}/infiniband/mad.h
+%{_includedir}/infiniband/mad_osd.h
+%{_pkgconfigdir}/libibmad.pc
+
+%if %{with static_libs}
+%files -n libibmad-static
+%defattr(644,root,root,755)
+%{_libdir}/libibmad.a
+%endif
+
 %files -n ibacm
 %defattr(644,root,root,755)
 %doc Documentation/ibacm.md
@@ -1310,6 +1554,93 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/infiniband/acm_prov.h
 %{_mandir}/man7/ibacm.7*
 %{_mandir}/man7/ibacm_prov.7*
+
+%files -n infiniband-diags
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_sbindir}/check_lft_balance.pl
+%attr(755,root,root) %{_sbindir}/dump_fts
+%attr(755,root,root) %{_sbindir}/dump_lfts.sh
+%attr(755,root,root) %{_sbindir}/dump_mfts.sh
+%attr(755,root,root) %{_sbindir}/ibaddr
+%attr(755,root,root) %{_sbindir}/ibcacheedit
+%attr(755,root,root) %{_sbindir}/ibccconfig
+%attr(755,root,root) %{_sbindir}/ibccquery
+%attr(755,root,root) %{_sbindir}/ibfindnodesusing.pl
+%attr(755,root,root) %{_sbindir}/ibhosts
+%attr(755,root,root) %{_sbindir}/ibidsverify.pl
+%attr(755,root,root) %{_sbindir}/iblinkinfo
+%attr(755,root,root) %{_sbindir}/ibnetdiscover
+%attr(755,root,root) %{_sbindir}/ibnodes
+%attr(755,root,root) %{_sbindir}/ibping
+%attr(755,root,root) %{_sbindir}/ibportstate
+%attr(755,root,root) %{_sbindir}/ibqueryerrors
+%attr(755,root,root) %{_sbindir}/ibroute
+%attr(755,root,root) %{_sbindir}/ibrouters
+%attr(755,root,root) %{_sbindir}/ibstat
+%attr(755,root,root) %{_sbindir}/ibstatus
+%attr(755,root,root) %{_sbindir}/ibswitches
+%attr(755,root,root) %{_sbindir}/ibsysstat
+%attr(755,root,root) %{_sbindir}/ibtracert
+%attr(755,root,root) %{_sbindir}/perfquery
+%attr(755,root,root) %{_sbindir}/saquery
+%attr(755,root,root) %{_sbindir}/sminfo
+%attr(755,root,root) %{_sbindir}/smpdump
+%attr(755,root,root) %{_sbindir}/smpquery
+%attr(755,root,root) %{_sbindir}/vendstat
+%dir %{_sysconfdir}/infiniband-diags
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/infiniband-diags/error_thresholds
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/infiniband-diags/ibdiag.conf
+%{perl_vendorlib}/IBswcountlimits.pm
+%{_mandir}/man8/check_lft_balance.8*
+%{_mandir}/man8/dump_fts.8*
+%{_mandir}/man8/dump_lfts.8*
+%{_mandir}/man8/dump_mfts.8*
+%{_mandir}/man8/ibaddr.8*
+%{_mandir}/man8/ibcacheedit.8*
+%{_mandir}/man8/ibccconfig.8*
+%{_mandir}/man8/ibccquery.8*
+%{_mandir}/man8/ibfindnodesusing.8*
+%{_mandir}/man8/ibhosts.8*
+%{_mandir}/man8/ibidsverify.8*
+%{_mandir}/man8/iblinkinfo.8*
+%{_mandir}/man8/ibnetdiscover.8*
+%{_mandir}/man8/ibnodes.8*
+%{_mandir}/man8/ibping.8*
+%{_mandir}/man8/ibportstate.8*
+%{_mandir}/man8/ibqueryerrors.8*
+%{_mandir}/man8/ibroute.8*
+%{_mandir}/man8/ibrouters.8*
+%{_mandir}/man8/ibstat.8*
+%{_mandir}/man8/ibstatus.8*
+%{_mandir}/man8/ibswitches.8*
+%{_mandir}/man8/ibsysstat.8*
+%{_mandir}/man8/ibtracert.8*
+%{_mandir}/man8/infiniband-diags.8*
+%{_mandir}/man8/perfquery.8*
+%{_mandir}/man8/saquery.8*
+%{_mandir}/man8/sminfo.8*
+%{_mandir}/man8/smpdump.8*
+%{_mandir}/man8/smpquery.8*
+%{_mandir}/man8/vendstat.8*
+
+%files -n infiniband-diags-libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibnetdisc.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libibnetdisc.so.5
+
+%files -n infiniband-diags-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibnetdisc.so
+%{_includedir}/infiniband/ibnetdisc.h
+%{_includedir}/infiniband/ibnetdisc_osd.h
+%{_pkgconfigdir}/libibnetdisc.pc
+%{_mandir}/man3/ibnd_*.3*
+
+%if %{with static_libs}
+%files -n infiniband-diags-static
+%defattr(644,root,root,755)
+%{_libdir}/libibnetdisc.a
+%endif
 
 %files -n iwpmd
 %defattr(644,root,root,755)
