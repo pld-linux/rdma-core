@@ -1,0 +1,103 @@
+--- rdma-core-28.0/providers/cxgb3/iwch.c.orig	2020-02-12 21:21:08.971189494 +0100
++++ rdma-core-28.0/providers/cxgb3/iwch.c	2020-02-12 21:28:50.972019955 +0100
+@@ -75,6 +75,14 @@
+ 	{},
+ };
+ 
++static void iwch_free_context(struct ibv_context *ibctx)
++{
++	struct iwch_context *context = to_iwch_ctx(ibctx);
++
++	verbs_uninit_context(&context->ibv_ctx);
++	free(context);
++}
++
+ static const struct verbs_context_ops iwch_ctx_common_ops = {
+ 	.query_device = iwch_query_device,
+ 	.query_port = iwch_query_port,
+@@ -98,6 +106,7 @@
+ 	.detach_mcast = iwch_detach_mcast,
+ 	.post_srq_recv = iwch_post_srq_recv,
+ 	.req_notify_cq = iwch_arm_cq,
++	.free_context = iwch_free_context,
+ };
+ 
+ static const struct verbs_context_ops iwch_ctx_t3a_ops = {
+@@ -160,14 +169,6 @@
+ 	return NULL;
+ }
+ 
+-static void iwch_free_context(struct ibv_context *ibctx)
+-{
+-	struct iwch_context *context = to_iwch_ctx(ibctx);
+-
+-	verbs_uninit_context(&context->ibv_ctx);
+-	free(context);
+-}
+-
+ static void iwch_uninit_device(struct verbs_device *verbs_device)
+ {
+ 	struct iwch_device *dev = to_iwch_dev(&verbs_device->device);
+@@ -264,6 +265,5 @@
+ 	.alloc_device = iwch_device_alloc,
+ 	.uninit_device = iwch_uninit_device,
+ 	.alloc_context = iwch_alloc_context,
+-	.free_context = iwch_free_context,
+ };
+ PROVIDER_DRIVER(cxgb3, iwch_dev_ops);
+--- rdma-core-28.0/providers/nes/nes_umain.c.orig	2020-02-12 22:09:28.778813223 +0100
++++ rdma-core-28.0/providers/nes/nes_umain.c	2020-02-13 16:19:10.874608034 +0100
+@@ -63,6 +63,18 @@
+ 	{},
+ };
+ 
++/**
++ * nes_ufree_context
++ */
++static void nes_ufree_context(struct ibv_context *ibctx)
++{
++	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
++	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
++
++	verbs_uninit_context(&nesvctx->ibv_ctx);
++	free(nesvctx);
++}
++
+ static const struct verbs_context_ops nes_uctx_ops = {
+ 	.query_device = nes_uquery_device,
+ 	.query_port = nes_uquery_port,
+@@ -87,6 +99,7 @@
+ 	.attach_mcast = nes_uattach_mcast,
+ 	.detach_mcast = nes_udetach_mcast,
+-	.async_event = nes_async_event
++	.async_event = nes_async_event,
++	.free_context = nes_ufree_context,
+ };
+ 
+ static const struct verbs_context_ops nes_uctx_no_db_ops = {
+@@ -163,18 +176,6 @@
+ }
+ 
+ 
+-/**
+- * nes_ufree_context
+- */
+-static void nes_ufree_context(struct ibv_context *ibctx)
+-{
+-	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
+-	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
+-
+-	verbs_uninit_context(&nesvctx->ibv_ctx);
+-	free(nesvctx);
+-}
+-
+ static void nes_uninit_device(struct verbs_device *verbs_device)
+ {
+ 	struct nes_udevice *dev = to_nes_udev(&verbs_device->device);
+@@ -215,6 +216,5 @@
+ 	.alloc_device = nes_device_alloc,
+ 	.uninit_device = nes_uninit_device,
+ 	.alloc_context = nes_ualloc_context,
+-	.free_context = nes_ufree_context,
+ };
+ PROVIDER_DRIVER(nes, nes_udev_ops);
