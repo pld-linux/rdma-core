@@ -6,16 +6,24 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	26.1
+Version:	28.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	f64c550c4534f262a28f49cc672c732f
+# Source0-md5:	780125feed6c599f2f22228db1a5996e
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
+# restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
+# from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
+Patch1:		%{name}-kernel-abi.patch
+# https://github.com/linux-rdma/rdma-core/commit/36588f5844af4ef1e5b0d6ad002fa1adf9032653.patch cut down (to revert)
+Patch2:		%{name}-cxgb3.patch
+# https://github.com/linux-rdma/rdma-core/commit/4daf5c91c1296683924cb9668c3d879da072756b.patch cut down (to revert)
+Patch3:		%{name}-nes.patch
+Patch4:		%{name}-providers-update.patch
 URL:		https://github.com/linux-rdma/rdma-core
 BuildRequires:	cmake >= 2.8.11
 BuildRequires:	docutils
@@ -1061,6 +1069,10 @@ Pyverbs to oparte na Cythonie API Pythona do libibverbs, zapewniające
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -R -p1
+%patch2 -R -p1
+%patch3 -R -p1
+%patch4 -p1
 
 %build
 install -d build
@@ -1407,11 +1419,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-rxe
 %defattr(644,root,root,755)
 %doc Documentation/rxe.md
-%attr(755,root,root) %{_bindir}/rxe_cfg
 %attr(755,root,root) %{_libdir}/libibverbs/librxe-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/rxe.driver
 %{_mandir}/man7/rxe.7*
-%{_mandir}/man8/rxe_cfg.8*
 
 %if %{with static_libs}
 %files -n libibverbs-driver-rxe-static
@@ -1669,9 +1679,9 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/srp_daemon_port@.service
 /lib/udev/rules.d/60-srp_daemon.rules
 %{_mandir}/man1/ibsrpdm.1*
-%{_mandir}/man1/srp_daemon.1*
 %{_mandir}/man5/srp_daemon.service.5*
 %{_mandir}/man5/srp_daemon_port@.service.5*
+%{_mandir}/man8/srp_daemon.8*
 
 %if %{with python}
 %files -n python3-pyverbs
