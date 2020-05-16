@@ -6,13 +6,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	28.0
+Version:	28.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	780125feed6c599f2f22228db1a5996e
+# Source0-md5:	28462da67c0b4e4c2072424cd67b0ffb
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
