@@ -6,13 +6,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	28.1
+Version:	31.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	28462da67c0b4e4c2072424cd67b0ffb
+# Source0-md5:	6076b2cfd5b0b22b88f1fb8dffd1aef7
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -1556,7 +1556,7 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/ibacm.service
 %{systemdunitdir}/ibacm.socket
 %{_mandir}/man1/ib_acme.1*
-%{_mandir}/man1/ibacm.1*
+%{_mandir}/man8/ibacm.8*
 
 %files -n ibacm-devel
 %defattr(644,root,root,755)
@@ -1678,9 +1678,9 @@ rm -rf $RPM_BUILD_ROOT
 %{systemdunitdir}/srp_daemon.service
 %{systemdunitdir}/srp_daemon_port@.service
 /lib/udev/rules.d/60-srp_daemon.rules
-%{_mandir}/man1/ibsrpdm.1*
 %{_mandir}/man5/srp_daemon.service.5*
 %{_mandir}/man5/srp_daemon_port@.service.5*
+%{_mandir}/man8/ibsrpdm.8*
 %{_mandir}/man8/srp_daemon.8*
 
 %if %{with python}
