@@ -6,13 +6,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	31.0
+Version:	37.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	6076b2cfd5b0b22b88f1fb8dffd1aef7
+# Source0-md5:	cc7227ca3b3357867742c95c73e66600
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -50,7 +50,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav25
+%define		ibv_abi		rdmav34
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -66,8 +66,8 @@ included with support for the following Kernel RDMA drivers:
  - iw_cxgb4.ko
  - hfi1.ko
  - hns-roce.ko
- - i40iw.ko
  - ib_qib.ko
+ - irdma.ko
  - mlx4_ib.ko
  - mlx5_ib.ko
  - ib_mthca.ko
@@ -96,8 +96,8 @@ libibverbs w jądrze dla następujących sterowników RDMA z jądra:
  - iw_cxgb4.ko
  - hfi1.ko
  - hns-roce.ko
- - i40iw.ko
  - ib_qib.ko
+ - irdma.ko
  - mlx4_ib.ko
  - mlx5_ib.ko
  - ib_mthca.ko
@@ -391,37 +391,6 @@ application.
 Statyczna wersja sterownika hns, którą można wbudować bezpośrednio w
 aplikację.
 
-%package -n libibverbs-driver-i40iw
-Summary:	Userspace driver for the Intel Ethernet Connection X722 RDMA adapters
-Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart RDMA Intel Ethernet Connection X722
-Group:		Libraries
-Requires:	libibverbs = %{version}-%{release}
-
-%description -n libibverbs-driver-i40iw
-libi40iw is a userspace driver for the Intel Ethernet Connection X722
-RDMA adapters. It works as a plug-in module for libibverbs that allows
-programs to use RDMA hardware directly from userspace.
-
-%description -n libibverbs-driver-i40iw -l pl.UTF-8
-libi40iw to sterownik przestrzeni użytkownika dla kart RDMA Intel
-Ethernet Connection X722 RDMA. Działa jako moduł ładowany przez
-libibverbs, pozwalający programom na dostęp z przestrzeni użytkownika
-do sprzętu RDMA.
-
-%package -n libibverbs-driver-i40iw-static
-Summary:	Static version of i40iw driver
-Summary(pl.UTF-8):	Statyczna wersja sterownika i40iw
-Group:		Development/Libraries
-Requires:	libibverbs-static = %{version}-%{release}
-
-%description -n libibverbs-driver-i40iw-static
-Static version of i40iw driver, which may be linked directly into
-application.
-
-%description -n libibverbs-driver-i40iw-static -l pl.UTF-8
-Statyczna wersja sterownika i40iw, którą można wbudować bezpośrednio
-w aplikację.
-
 %package -n libibverbs-driver-ipathverbs
 Summary:	Userspace driver for the QLogic InfiniBand HCAs
 Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart QLogic InfiniBand HCA
@@ -468,6 +437,39 @@ application.
 %description -n libibverbs-driver-ipathverbs-static -l pl.UTF-8
 Statyczna wersja sterownika ipathverbs, którą można wbudować
 bezpośrednio w aplikację.
+
+%package -n libibverbs-driver-irdma
+Summary:	Userspace driver for the Intel Ethernet Connection E810 and X722 RDMA adapters
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart RDMA Intel Ethernet Connection E810 i X722
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+Obsoletes:	libibverbs-driver-i40iw < 37.1
+
+%description -n libibverbs-driver-irdma
+libirdma is a userspace driver for the Intel Ethernet Connection E810
+and X722 RDMA adapters. It works as a plug-in module for libibverbs
+that allows programs to use RDMA hardware directly from userspace.
+
+%description -n libibverbs-driver-irdma -l pl.UTF-8
+libirdma to sterownik przestrzeni użytkownika dla kart RDMA Intel
+Ethernet Connection E810 i X722. Działa jako moduł ładowany przez
+libibverbs, pozwalający programom na dostęp z przestrzeni użytkownika
+do sprzętu RDMA.
+
+%package -n libibverbs-driver-irdma-static
+Summary:	Static version of irdma driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika irdma
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+Obsoletes:	libibverbs-driver-i40iw-static < 37.1
+
+%description -n libibverbs-driver-irdma-static
+Static version of irdma driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-irdma-static -l pl.UTF-8
+Statyczna wersja sterownika irdma, którą można wbudować bezpośrednio
+w aplikację.
 
 %package -n libibverbs-driver-mlx4
 Summary:	Userspace driver for the Mellanox ConnectX InfiniBand HCAs
@@ -1267,6 +1269,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/infiniband/efadv.h
 %{_pkgconfigdir}/libefa.pc
 %{_mandir}/man3/efadv_create_driver_qp.3*
+%{_mandir}/man3/efadv_create_qp_ex.3*
+%{_mandir}/man3/efadv_query_ah.3*
+%{_mandir}/man3/efadv_query_device.3*
 %{_mandir}/man7/efadv.7*
 
 %if %{with static_libs}
@@ -1297,17 +1302,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libhns-%{ibv_abi}.a
 %endif
 
-%files -n libibverbs-driver-i40iw
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libi40iw-%{ibv_abi}.so
-%{_sysconfdir}/libibverbs.d/i40iw.driver
-
-%if %{with static_libs}
-%files -n libibverbs-driver-i40iw-static
-%defattr(644,root,root,755)
-%{_libdir}/libi40iw-%{ibv_abi}.a
-%endif
-
 %files -n libibverbs-driver-ipathverbs
 %defattr(644,root,root,755)
 %attr(755,roor,root) %{_libexecdir}/truescale-serdes.cmds
@@ -1319,6 +1313,17 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-ipathverbs-static
 %defattr(644,root,root,755)
 %{_libdir}/libipathverbs-%{ibv_abi}.a
+%endif
+
+%files -n libibverbs-driver-irdma
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibverbs/libirdma-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/irdma.driver
+
+%if %{with static_libs}
+%files -n libibverbs-driver-irdma-static
+%defattr(644,root,root,755)
+%{_libdir}/libirdma-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-mlx4

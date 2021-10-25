@@ -101,3 +101,147 @@
 -	.free_context = nes_ufree_context,
  };
  PROVIDER_DRIVER(nes, nes_udev_ops);
+--- rdma-core-37.1/providers/cxgb3/iwch.h.orig	2021-10-23 21:31:34.732657063 +0200
++++ rdma-core-37.1/providers/cxgb3/iwch.h	2021-10-24 08:37:17.256269862 +0200
+@@ -143,7 +143,8 @@ static inline unsigned long long_log2(un
+ }
+ 
+ extern int iwch_query_device(struct ibv_context *context,
+-			     struct ibv_device_attr *attr);
++			     const struct ibv_query_device_ex_input *input,
++			     struct ibv_device_attr_ex *attr, size_t attr_size);
+ extern int iwch_query_port(struct ibv_context *context, uint8_t port,
+ 			   struct ibv_port_attr *attr);
+ 
+--- rdma-core-37.1/providers/cxgb3/verbs.c.orig	2021-10-23 21:31:34.735990379 +0200
++++ rdma-core-37.1/providers/cxgb3/verbs.c	2021-10-24 09:00:27.472071750 +0200
+@@ -42,23 +42,24 @@
+ #include "iwch.h"
+ #include "iwch-abi.h"
+ 
+-int iwch_query_device(struct ibv_context *context, struct ibv_device_attr *attr)
++int iwch_query_device(struct ibv_context *context, const struct ibv_query_device_ex_input *input, struct ibv_device_attr_ex *attr, size_t attr_size)
+ {
+-	struct ibv_query_device cmd;
++	struct ib_uverbs_ex_query_device_resp resp;
++	size_t resp_size = sizeof(resp);
+ 	uint64_t raw_fw_ver;
+ 	unsigned major, minor, sub_minor;
+ 	int ret;
+ 
+-	ret = ibv_cmd_query_device(context, attr, &raw_fw_ver, &cmd, 
+-	  			   sizeof cmd);
++	ret = ibv_cmd_query_device_any(context, input, attr, attr_size, &resp, &resp_size);
+ 	if (ret)
+ 		return ret;
+ 
++	raw_fw_ver = resp.base.fw_ver;
+ 	major = (raw_fw_ver >> 32) & 0xffff;
+ 	minor = (raw_fw_ver >> 16) & 0xffff;
+ 	sub_minor = raw_fw_ver & 0xffff;
+ 
+-	snprintf(attr->fw_ver, sizeof attr->fw_ver,
++	snprintf(attr->orig_attr.fw_ver, 64,
+ 		 "%d.%d.%d", major, minor, sub_minor);
+ 
+ 	return 0;
+--- rdma-core-37.1/providers/cxgb3/iwch.c.orig	2021-10-23 21:31:35.429319956 +0200
++++ rdma-core-37.1/providers/cxgb3/iwch.c	2021-10-25 18:20:12.958721287 +0200
+@@ -84,7 +84,7 @@ static void iwch_free_context(struct ibv
+ }
+ 
+ static const struct verbs_context_ops iwch_ctx_common_ops = {
+-	.query_device = iwch_query_device,
++	.query_device_ex = iwch_query_device,
+ 	.query_port = iwch_query_port,
+ 	.alloc_pd = iwch_alloc_pd,
+ 	.dealloc_pd = iwch_free_pd,
+@@ -185,35 +185,6 @@ static bool iwch_device_match(struct ver
+ 	if (!sysfs_dev->match)
+ 		return false;
+ 
+-	/* 
+-	 * Verify that the firmware major number matches.  Major number
+-	 * mismatches are fatal.  Minor number mismatches are tolerated.
+-	 */
+-	if (ibv_get_fw_ver(value, sizeof(value), sysfs_dev))
+-		return false;
+-
+-	cp = strtok(value+1, ".");
+-	sscanf(cp, "%i", &fw_maj);
+-	cp = strtok(NULL, ".");
+-	sscanf(cp, "%i", &fw_min);
+-
+-	if (fw_maj < FW_MAJ) {
+-		fprintf(stderr, "libcxgb3: Fatal firmware version mismatch.  "
+-			"Firmware major number is %u and libcxgb3 needs %u.\n",
+-			fw_maj, FW_MAJ);	
+-		fflush(stderr);
+-		return false;
+-	}
+-
+-	DBGLOG("libcxgb3");
+-
+-	if ((signed int)fw_min < FW_MIN) {
+-		PDBG("libcxgb3: non-fatal firmware version mismatch.  "
+-			"Firmware minor number is %u and libcxgb3 needs %u.\n",
+-			fw_min, FW_MIN);
+-		fflush(stderr);
+-	}
+-
+ 	return true;
+ }
+ 
+--- rdma-core-37.1/providers/nes/nes_umain.c.orig	2021-10-23 21:31:35.429319956 +0200
++++ rdma-core-37.1/providers/nes/nes_umain.c	2021-10-25 20:11:56.505738392 +0200
+@@ -76,7 +76,7 @@ static void nes_ufree_context(struct ibv
+ }
+ 
+ static const struct verbs_context_ops nes_uctx_ops = {
+-	.query_device = nes_uquery_device,
++	.query_device_ex = nes_uquery_device,
+ 	.query_port = nes_uquery_port,
+ 	.alloc_pd = nes_ualloc_pd,
+ 	.dealloc_pd = nes_ufree_pd,
+--- rdma-core-37.1/providers/nes/nes_umain.h.orig	2021-10-23 21:31:34.749323640 +0200
++++ rdma-core-37.1/providers/nes/nes_umain.h	2021-10-25 20:13:09.838674447 +0200
+@@ -346,7 +346,7 @@ static inline struct nes_uqp *to_nes_uqp
+ 
+ 
+ /* nes_uverbs.c */
+-int nes_uquery_device(struct ibv_context *, struct ibv_device_attr *);
++int nes_uquery_device(struct ibv_context *, const struct ibv_query_device_ex_input *, struct ibv_device_attr_ex *, size_t);
+ int nes_uquery_port(struct ibv_context *, uint8_t, struct ibv_port_attr *);
+ struct ibv_pd *nes_ualloc_pd(struct ibv_context *);
+ int nes_ufree_pd(struct ibv_pd *);
+--- rdma-core-37.1/providers/nes/nes_uverbs.c.orig	2021-10-23 21:31:34.749323640 +0200
++++ rdma-core-37.1/providers/nes/nes_uverbs.c	2021-10-25 20:17:56.213789687 +0200
+@@ -74,22 +74,23 @@ struct nes_ud_recv_wr {
+ /**
+  * nes_uquery_device
+  */
+-int nes_uquery_device(struct ibv_context *context, struct ibv_device_attr *attr)
++int nes_uquery_device(struct ibv_context *context, const struct ibv_query_device_ex_input *input, struct ibv_device_attr_ex *attr, size_t attr_size)
+ {
+-	struct ibv_query_device cmd;
++	struct ib_uverbs_ex_query_device_resp resp;
++	size_t resp_size = sizeof(resp);
+ 	uint64_t nes_fw_ver;
+ 	int ret;
+ 	unsigned int minor, major;
+ 
+-	ret = ibv_cmd_query_device(context, attr, &nes_fw_ver,
+-					&cmd, sizeof cmd);
++	ret = ibv_cmd_query_device_any(context, input, attr, attr_size, &resp, &resp_size);
+ 	if (ret)
+ 		return ret;
+ 
++	nes_fw_ver = resp.base.fw_ver;
+ 	major = (nes_fw_ver >> 16) & 0xffff;
+ 	minor = nes_fw_ver & 0xffff;
+ 
+-	snprintf(attr->fw_ver, sizeof attr->fw_ver,
++	snprintf(attr->orig_attr.fw_ver, 64,
+ 		"%d.%d", major, minor);
+ 
+ 	return 0;
