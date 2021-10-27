@@ -178,7 +178,7 @@ Summary:	Static libibverbs library
 Summary(pl.UTF-8):	Statyczna biblioteka libibverbs
 Group:		Development/Libraries
 Requires:	libibverbs-devel = %{version}-%{release}
-Obsoletes:	libibverbs-devel-static
+Obsoletes:	libibverbs-devel-static < 1.1.2
 
 %description -n libibverbs-static
 Static libibverbs library.
