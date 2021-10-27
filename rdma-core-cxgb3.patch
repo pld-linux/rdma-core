@@ -79,8 +79,8 @@ diff --git a/kernel-boot/rdma-hw-modules.rules b/kernel-boot/rdma-hw-modules.rul
 index dde0ab8da..da4bbe363 100644
 --- a/kernel-boot/rdma-hw-modules.rules
 +++ b/kernel-boot/rdma-hw-modules.rules
-@@ -8,7 +8,6 @@ SUBSYSTEM!="net", GOTO="rdma_hw_modules_end"
- # RDMA.
+@@ -9,7 +9,6 @@ SUBSYSTEM!="net", GOTO="rdma_hw_modules_end"
+ 
  ENV{ID_NET_DRIVER}=="be2net", RUN{builtin}+="kmod load ocrdma"
  ENV{ID_NET_DRIVER}=="bnxt_en", RUN{builtin}+="kmod load bnxt_re"
 -ENV{ID_NET_DRIVER}=="cxgb3", RUN{builtin}+="kmod load iw_cxgb3"

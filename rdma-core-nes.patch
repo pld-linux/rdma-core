@@ -73,13 +73,14 @@ diff --git a/kernel-boot/rdma-hw-modules.rules b/kernel-boot/rdma-hw-modules.rul
 index da4bbe363..bee416dbe 100644
 --- a/kernel-boot/rdma-hw-modules.rules
 +++ b/kernel-boot/rdma-hw-modules.rules
-@@ -33,6 +33,5 @@ ENV{ID_NET_DRIVER}=="enic", RUN{builtin}+="kmod load usnic_verbs"
+@@ -33,7 +33,6 @@ ENV{ID_NET_DRIVER}=="enic", RUN{builtin}+="kmod load usnic_verbs"
  # ipathverbs
  # mthca
  # vmw_pvrdma
 -# nes
  
- LABEL="rdma_hw_modules_end"
+ LABEL="rdma_hw_modules_net_end"
+ 
 diff --git a/libibverbs/verbs.h b/libibverbs/verbs.h
 index 12a33a99a..13e7c63e7 100644
 --- a/libibverbs/verbs.h

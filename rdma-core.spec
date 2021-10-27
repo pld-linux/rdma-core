@@ -19,10 +19,10 @@ Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
 Patch1:		%{name}-kernel-abi.patch
-# https://github.com/linux-rdma/rdma-core/commit/36588f5844af4ef1e5b0d6ad002fa1adf9032653.patch cut down (to revert)
-Patch2:		%{name}-cxgb3.patch
 # https://github.com/linux-rdma/rdma-core/commit/4daf5c91c1296683924cb9668c3d879da072756b.patch cut down (to revert)
-Patch3:		%{name}-nes.patch
+Patch2:		%{name}-nes.patch
+# https://github.com/linux-rdma/rdma-core/commit/36588f5844af4ef1e5b0d6ad002fa1adf9032653.patch cut down (to revert)
+Patch3:		%{name}-cxgb3.patch
 Patch4:		%{name}-providers-update.patch
 URL:		https://github.com/linux-rdma/rdma-core
 BuildRequires:	cmake >= 2.8.11
