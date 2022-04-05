@@ -2,6 +2,7 @@
 #
 # Conditional build:
 %bcond_without	static_libs	# static libraries
+%bcond_without	systemd		# systemd
 
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
@@ -40,7 +41,7 @@ BuildRequires:	python3-devel >= 1:3.2
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.605
 BuildRequires:	udev-devel
-BuildRequires:	systemd-devel
+%{?with_systemd:BuildRequires:	systemd-devel}
 Requires:	ibacm = %{version}-%{release}
 Requires:	iwpmd = %{version}-%{release}
 Requires:	rdma-boot = %{version}-%{release}
