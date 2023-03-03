@@ -7,13 +7,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	43.0
+Version:	44.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	3785fd2b35cd41043ab53226fc112d41
+# Source0-md5:	ce0e0c383d682b41e31ac8fe2139e62f
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -65,12 +65,15 @@ libraries for the following device nodes:
 
 The userspace component of the libibverbs RDMA kernel drivers are
 included with support for the following Kernel RDMA drivers:
+ - efa.ko
+ - erdma.ko
  - iw_cxgb3.ko
  - iw_cxgb4.ko
  - hfi1.ko
  - hns-roce.ko
  - ib_qib.ko
  - irdma.ko
+ - mana_ib.ko
  - mlx4_ib.ko
  - mlx5_ib.ko
  - ib_mthca.ko
@@ -78,6 +81,7 @@ included with support for the following Kernel RDMA drivers:
  - ocrdma.ko
  - qedr.ko
  - rdma_rxe.ko
+ - siw.ko
  - vmw_pvrdma.ko
 
 Additional service daemons are provided for:
@@ -95,12 +99,15 @@ przestrzeni użytkownika dla następujących urządzeń:
 
 Dołączony jest komponent przestrzeni użytkownika dla sterowników RDMA
 libibverbs w jądrze dla następujących sterowników RDMA z jądra:
+ - efa.ko
+ - erdma.ko
  - iw_cxgb3.ko
  - iw_cxgb4.ko
  - hfi1.ko
  - hns-roce.ko
  - ib_qib.ko
  - irdma.ko
+ - mana_ib.ko
  - mlx4_ib.ko
  - mlx5_ib.ko
  - ib_mthca.ko
@@ -108,6 +115,7 @@ libibverbs w jądrze dla następujących sterowników RDMA z jądra:
  - ocrdma.ko
  - qedr.ko
  - rdma_rxe.ko
+ - siw.ko
  - vmw_pvrdma.ko
 
 Są także demony dodatkowych usług:
@@ -499,6 +507,62 @@ application.
 
 %description -n libibverbs-driver-irdma-static -l pl.UTF-8
 Statyczna wersja sterownika irdma, którą można wbudować bezpośrednio
+w aplikację.
+
+%package -n libibverbs-driver-mana
+Summary:	Userspace driver for Microsoft Azure Network Adapter
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart Microsoft Azure Network Adapter
+Group:		Libraries
+Requires:	libibverbs-driver-mana-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-mana
+libmana is a userspace driver for Microsoft Azure Network Adapters.
+It works as a plug-in module for libibverbs that allows programs to
+use Mellanox hardware directly from userspace.
+
+%description -n libibverbs-driver-mana -l pl.UTF-8
+libmana to sterownik przestrzeni użytkownika dla kart Microsoft Azure
+Network Adapter. Działa jako moduł ładowany przez libibverbs,
+pozwalający programom na dostęp z przestrzeni użytkownika do sprzętu
+Mellanox.
+
+%package -n libibverbs-driver-mana-libs
+Summary:	Shared library for Microsoft Azure Network Adapter
+Summary(pl.UTF-8):	Biblioteka współdzielona dla kart Microsoft Azure Network Adapter
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-mana-libs
+Shared library for Microsoft Azure Network Adapter.
+
+%description -n libibverbs-driver-mana-libs -l pl.UTF-8
+Biblioteka współdzielona dla kart Microsoft Azure Network Adapter.
+
+%package -n libibverbs-driver-mana-devel
+Summary:	Header file for Microsoft Azure Network Adapter library
+Summary(pl.UTF-8):	Plik nagłówkowy biblioteki dla kart Microsoft Azure Network Adapter
+Group:		Development/Libraries
+Requires:	libibverbs-devel = %{version}-%{release}
+Requires:	libibverbs-driver-mana-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-mana-devel
+Header file for the Microsoft Azure Network Adapter library.
+
+%description -n libibverbs-driver-mana-devel -l pl.UTF-8
+Plik nagłówkowy biblioteki dla kart Microsoft Azure Network Adapter.
+
+%package -n libibverbs-driver-mana-static
+Summary:	Static version of mana driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika mana
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+
+%description -n libibverbs-driver-mana-static
+Static version of mana driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-mana-static -l pl.UTF-8
+Statyczna wersja sterownika mana, którą można wbudować bezpośrednio
 w aplikację.
 
 %package -n libibverbs-driver-mlx4
@@ -1163,6 +1227,9 @@ rm -rf $RPM_BUILD_ROOT
 %post	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
 
+%post	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
+%postun	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
+
 %post	-n libibverbs-driver-mlx4-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-mlx4-libs -p /sbin/ldconfig
 
@@ -1365,6 +1432,28 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_libdir}/libirdma-%{ibv_abi}.a
 %endif
+
+%files -n libibverbs-driver-mana
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibverbs/libmana-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/mana.driver
+
+%files -n libibverbs-driver-mana-libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libmana.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libmana.so.1
+
+%files -n libibverbs-driver-mana-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libmana.so
+%{_includedir}/infiniband/manadv.h
+%{_pkgconfigdir}/libmana.pc
+%{_mandir}/man3/manadv_*.3*
+%{_mandir}/man7/manadv.7*
+
+%files -n libibverbs-driver-mana-static
+%defattr(644,root,root,755)
+%{_libdir}/libmana.a
 
 %files -n libibverbs-driver-mlx4
 %defattr(644,root,root,755)
