@@ -7,13 +7,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	42.1
+Version:	43.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	c60ef0fbdb7b1773dc71998bcf4ae3c0
+# Source0-md5:	3785fd2b35cd41043ab53226fc112d41
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -341,6 +341,33 @@ application.
 %description -n libibverbs-driver-efa-static -l pl.UTF-8
 Statyczna wersja sterownika efa, którą można wbudować bezpośrednio
 w aplikację.
+
+%package -n libibverbs-driver-erdma
+Summary:	Userspace driver for Alibaba Elastic RDMA (iWarp)  adapters
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart Alibaba Elastic RDMA (iWarp) 
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-erdma
+Userspace driver for Alibaba Elastic RDMA (iWarp)  adapters.
+
+%description -n libibverbs-driver-erdma -l pl.UTF-8
+Sterownik przestrzeni użytkownika dla kart Alibaba Elastic RDMA
+(iWarp).
+
+%package -n libibverbs-driver-erdma-static
+Summary:	Static version of erdma driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika erdma
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+
+%description -n libibverbs-driver-erdma-static
+Static version of erdma driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-erdma-static -l pl.UTF-8
+Statyczna wersja sterownika erdma, którą można wbudować bezpośrednio w
+aplikację.
 
 %package -n libibverbs-driver-hfi1verbs
 Summary:	Userspace driver for Intel OPA Gen1 adapters
@@ -1160,7 +1187,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n rdma-boot
 %defattr(644,root,root,755)
-%doc Documentation/udev.md
+%doc Documentation/udev.md build/kernel-boot/persistent-ipoib.rules.in
 %dir %{_sysconfdir}/rdma
 %dir %{_sysconfdir}/rdma/modules
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/rdma/modules/infiniband.conf
@@ -1176,7 +1203,6 @@ rm -rf $RPM_BUILD_ROOT
 /lib/udev/rules.d/90-rdma-hw-modules.rules
 /lib/udev/rules.d/90-rdma-ulp-modules.rules
 /lib/udev/rules.d/90-rdma-umad.rules
-%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/70-persistent-ipoib.rules
 
 %files -n rdma-ndd
 %defattr(644,root,root,755)
@@ -1281,6 +1307,17 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-efa-static
 %defattr(644,root,root,755)
 %{_libdir}/libefa.a
+%endif
+
+%files -n libibverbs-driver-erdma
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libibverbs/liberdma-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/erdma.driver
+
+%if %{with static_libs}
+%files -n libibverbs-driver-erdma-static
+%defattr(644,root,root,755)
+%{_libdir}/liberdma-%{ibv_abi}.a
 %endif
 
 %files -n libibverbs-driver-hfi1verbs

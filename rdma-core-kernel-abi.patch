@@ -31,8 +31,8 @@ index 50bc77e6a..2d0766dd1 100644
 -  rdma/cxgb3-abi.h
    rdma/cxgb4-abi.h
    rdma/efa-abi.h
-   rdma/hns-abi.h
-@@ -15,7 +14,6 @@ publish_internal_headers(rdma
+   rdma/erdma-abi.h
+@@ -16,7 +15,6 @@ publish_internal_headers(rdma
    rdma/mlx5_user_ioctl_cmds.h
    rdma/mlx5_user_ioctl_verbs.h
    rdma/mthca-abi.h
@@ -40,15 +40,15 @@ index 50bc77e6a..2d0766dd1 100644
    rdma/ocrdma-abi.h
    rdma/qedr-abi.h
    rdma/rdma_netlink.h
-@@ -59,7 +58,6 @@ endfunction()
+@@ -66,7 +64,6 @@ endfunction()
  # Transform the kernel ABIs used by the providers
  rdma_kernel_provider_abi(
    rdma/bnxt_re-abi.h
 -  rdma/cxgb3-abi.h
    rdma/cxgb4-abi.h
    rdma/efa-abi.h
-   rdma/hns-abi.h
-@@ -68,7 +66,6 @@ rdma_kernel_provider_abi(
+   rdma/erdma-abi.h
+@@ -76,7 +73,6 @@ rdma_kernel_provider_abi(
    rdma/mlx4-abi.h
    rdma/mlx5-abi.h
    rdma/mthca-abi.h

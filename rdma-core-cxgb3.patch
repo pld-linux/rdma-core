@@ -55,10 +55,10 @@ diff --git a/README.md b/README.md
 index 451ff7fcb..a96351933 100644
 --- a/README.md
 +++ b/README.md
-@@ -15,7 +15,6 @@ under the providers/ directory. Support for the following Kernel RDMA drivers
- is included:
+@@ -16,7 +16,6 @@ is included:
  
   - efa.ko
+  - erdma.ko
 - - iw_cxgb3.ko
   - iw_cxgb4.ko
   - hfi1.ko
@@ -91,14 +91,14 @@ diff --git a/libibverbs/verbs.h b/libibverbs/verbs.h
 index c411722b1..12a33a99a 100644
 --- a/libibverbs/verbs.h
 +++ b/libibverbs/verbs.h
-@@ -2144,7 +2144,6 @@ struct ibv_device **ibv_get_device_list(int *num_devices);
+@@ -2210,7 +2210,6 @@ struct ibv_device **ibv_get_device_list(
  
  struct verbs_devices_ops;
  extern const struct verbs_device_ops verbs_provider_bnxt_re;
 -extern const struct verbs_device_ops verbs_provider_cxgb3;
  extern const struct verbs_device_ops verbs_provider_cxgb4;
  extern const struct verbs_device_ops verbs_provider_efa;
- extern const struct verbs_device_ops verbs_provider_hfi1verbs;
+ extern const struct verbs_device_ops verbs_provider_erdma;
 diff --git a/providers/cxgb3/CMakeLists.txt b/providers/cxgb3/CMakeLists.txt
 deleted file mode 100644
 index a578105e7..000000000
