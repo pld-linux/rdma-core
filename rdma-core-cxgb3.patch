@@ -55,8 +55,8 @@ diff --git a/README.md b/README.md
 index 451ff7fcb..a96351933 100644
 --- a/README.md
 +++ b/README.md
-@@ -16,7 +16,6 @@ is included:
- 
+@@ -17,7 +17,6 @@ is included:
+  - bnxt_re.ko
   - efa.ko
   - erdma.ko
 - - iw_cxgb3.ko

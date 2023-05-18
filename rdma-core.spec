@@ -7,13 +7,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	44.0
+Version:	45.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	ce0e0c383d682b41e31ac8fe2139e62f
+# Source0-md5:	2b170e6d2ad66fb688580520a16d1ad5
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -65,6 +65,7 @@ libraries for the following device nodes:
 
 The userspace component of the libibverbs RDMA kernel drivers are
 included with support for the following Kernel RDMA drivers:
+ - bnxt_re.ko
  - efa.ko
  - erdma.ko
  - iw_cxgb3.ko
@@ -99,6 +100,7 @@ przestrzeni użytkownika dla następujących urządzeń:
 
 Dołączony jest komponent przestrzeni użytkownika dla sterowników RDMA
 libibverbs w jądrze dla następujących sterowników RDMA z jądra:
+ - bnxt_re.ko
  - efa.ko
  - erdma.ko
  - iw_cxgb3.ko
@@ -1216,7 +1218,7 @@ sed -e 's,@prefix@,%{_prefix},;
 	s,@LIBVERSION@,%{version},' %{SOURCE2} >$RPM_BUILD_ROOT%{_pkgconfigdir}/rdmacm.pc
 
 # packaged as %doc
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/{MAINTAINERS,*.md}
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/{MAINTAINERS,*.md,70-persistent-ipoib.rules}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
