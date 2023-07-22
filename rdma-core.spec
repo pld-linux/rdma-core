@@ -1,4 +1,6 @@
-# TODO: PLDify SysV init scripts
+# TODO:
+# - PLDify SysV init scripts
+# - drop ibverbs.pc and rdmacm.pc when not used by other packages
 #
 # Conditional build:
 %bcond_without	static_libs	# static libraries
@@ -7,13 +9,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	46.0
+Version:	47.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	02982b5855986d8bc981de3d5dbeb8de
+# Source0-md5:	f7aa87e9775e690f17b20ada581c26df
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
