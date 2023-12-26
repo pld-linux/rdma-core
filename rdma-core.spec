@@ -9,13 +9,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	47.0
+Version:	48.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	f7aa87e9775e690f17b20ada581c26df
+# Source0-md5:	f8901665b2fbf03b4ffb6bf7f6207ac4
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -28,7 +28,7 @@ Patch2:		%{name}-nes.patch
 Patch3:		%{name}-cxgb3.patch
 Patch4:		%{name}-providers-update.patch
 URL:		https://github.com/linux-rdma/rdma-core
-BuildRequires:	cmake >= 2.8.11
+BuildRequires:	cmake >= 2.8.12
 BuildRequires:	docutils
 # i915_drm.h, amdgpu_drm.h
 BuildRequires:	libdrm-devel
