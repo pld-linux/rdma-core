@@ -42,6 +42,7 @@ BuildRequires:	python3 >= 1:3
 %if %{with python}
 BuildRequires:	python3-Cython
 BuildRequires:	python3-devel >= 1:3.2
+BuildRequires:	python3-modules >= 1:3.2
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.605
 BuildRequires:	udev-devel
