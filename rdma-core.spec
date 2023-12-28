@@ -356,7 +356,7 @@ w aplikację.
 
 %package -n libibverbs-driver-erdma
 Summary:	Userspace driver for Alibaba Elastic RDMA (iWarp)  adapters
-Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart Alibaba Elastic RDMA (iWarp) 
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla kart Alibaba Elastic RDMA (iWarp)
 Group:		Libraries
 Requires:	libibverbs = %{version}-%{release}
 
@@ -1455,9 +1455,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/manadv_*.3*
 %{_mandir}/man7/manadv.7*
 
+%if %{with static_libs}
 %files -n libibverbs-driver-mana-static
 %defattr(644,root,root,755)
 %{_libdir}/libmana.a
+%endif
 
 %files -n libibverbs-driver-mlx4
 %defattr(644,root,root,755)
