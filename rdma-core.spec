@@ -9,13 +9,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	49.0
+Version:	50.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	9fe3909f19c7e0276c9e546411bbb49c
+# Source0-md5:	2883c7263d6b103ca86cc9c867839e38
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -1373,6 +1373,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/efadv_create_qp_ex.3*
 %{_mandir}/man3/efadv_query_ah.3*
 %{_mandir}/man3/efadv_query_device.3*
+%{_mandir}/man3/efadv_query_mr.3*
 %{_mandir}/man7/efadv.7*
 
 %if %{with static_libs}
