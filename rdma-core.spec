@@ -9,13 +9,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	50.0
+Version:	51.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	2883c7263d6b103ca86cc9c867839e38
+# Source0-md5:	aeb5fd40a9bcf3da4bfd0b4b8899248d
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -412,13 +412,38 @@ bezpośrednio w aplikację.
 Summary:	Userspace driver for Hisilicon RoCE devices
 Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla urządzeń Hisilicon RoCE
 Group:		Libraries
-Requires:	libibverbs = %{version}-%{release}
+Requires:	libibverbs-driver-hns-libs = %{version}-%{release}
 
 %description -n libibverbs-driver-hns
 Userspace driver for Hisilicon RoCE devices.
 
 %description -n libibverbs-driver-hns -l pl.UTF-8
 Sterownik przestrzeni użytkownika dla urządzeń Hisilicon RoCE.
+
+%package -n libibverbs-driver-hns-libs
+Summary:	Shared library for Hisilicon RoCE devices
+Summary(pl.UTF-8):	Biblioteka współdzielona dla urządzeń Hisilicon RoCE
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-hns-libs
+Shared library for Hisilicon RoCE devices.
+
+%description -n libibverbs-driver-hns-libs -l pl.UTF-8
+Biblioteka współdzielona dla urządzeń Hisilicon RoCE.
+
+%package -n libibverbs-driver-hns-devel
+Summary:	Header files for Hisilicon RoCE devices library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki dla urządzeń Hisilicon RoCE
+Group:		Development/Libraries
+Requires:	libibverbs-devel = %{version}-%{release}
+Requires:	libibverbs-driver-hns-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-hns-devel
+Header files for Hisilicon RoCE devices library.
+
+%description -n libibverbs-driver-hns-devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki dla urządzeń Hisilicon RoCE.
 
 %package -n libibverbs-driver-hns-static
 Summary:	Static version of hns driver
@@ -1186,6 +1211,7 @@ cd build
 	-DCMAKE_INSTALL_PERLDIR=%{perl_vendorlib} \
 	-DCMAKE_INSTALL_SYSTEMD_SERVICEDIR=%{systemdunitdir} \
 	-DCMAKE_INSTALL_UDEV_RULESDIR=/lib/udev/rules.d \
+	-DDRM_INCLUDE_DIRS=/usr/include/libdrm \
 	%{?with_static_libs:-DENABLE_STATIC=ON} \
 %if %{with python}
 	-DNO_PYVERBS=OFF \
@@ -1198,7 +1224,6 @@ cd build
 
 %install
 rm -rf $RPM_BUILD_ROOT
-#install -d $RPM_BUILD_ROOT%{_pkgconfigdir}
 
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -1231,6 +1256,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %post	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-efa-libs -p /sbin/ldconfig
+
+%post	-n libibverbs-driver-hns-libs -p /sbin/ldconfig
+%postun	-n libibverbs-driver-hns-libs -p /sbin/ldconfig
 
 %post	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
@@ -1409,10 +1437,23 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libibverbs/libhns-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/hns.driver
 
+%files -n libibverbs-driver-hns-libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libhns.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libhns.so.1
+
+%files -n libibverbs-driver-hns-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libhns.so
+%{_includedir}/infiniband/hnsdv.h
+%{_pkgconfigdir}/libhns.pc
+%{_mandir}/man3/hnsdv_*.3*
+%{_mandir}/man7/hnsdv.7*
+
 %if %{with static_libs}
 %files -n libibverbs-driver-hns-static
 %defattr(644,root,root,755)
-%{_libdir}/libhns-%{ibv_abi}.a
+%{_libdir}/libhns.a
 %endif
 
 %files -n libibverbs-driver-ipathverbs
