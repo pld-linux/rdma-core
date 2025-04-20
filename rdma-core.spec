@@ -1194,11 +1194,11 @@ Pyverbs to oparte na Cythonie API Pythona do libibverbs, zapewniające
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -R -p1
-%patch2 -R -p1
-%patch3 -R -p1
-%patch4 -p1
+%patch -P0 -p1
+%patch -P1 -R -p1
+%patch -P2 -R -p1
+%patch -P3 -R -p1
+%patch -P4 -p1
 
 %build
 install -d build
