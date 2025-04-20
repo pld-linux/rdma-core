@@ -62,7 +62,7 @@ index 451ff7fcb..a96351933 100644
 - - iw_cxgb3.ko
   - iw_cxgb4.ko
   - hfi1.ko
-  - hns-roce.ko
+  - hns-roce-hw-v2.ko
 diff --git a/kernel-boot/rdma-description.rules b/kernel-boot/rdma-description.rules
 index bb33dce40..4ea59ba19 100644
 --- a/kernel-boot/rdma-description.rules
