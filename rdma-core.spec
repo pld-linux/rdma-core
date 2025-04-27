@@ -10,7 +10,7 @@ Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
 Version:	56.1
-Release:	1
+Release:	2
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
@@ -1458,7 +1458,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-ipathverbs
 %defattr(644,root,root,755)
-%attr(755,roor,root) %{_libexecdir}/truescale-serdes.cmds
+%attr(755,root,root) %{_libexecdir}/truescale-serdes.cmds
 %attr(755,root,root) %{_libdir}/libibverbs/libipathverbs-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/ipathverbs.driver
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/truescale.conf
@@ -1854,7 +1854,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/ibsrpdm
 %attr(755,root,root) %{_sbindir}/run_srp_daemon
 %dir %{_libexecdir}/srp_daemon
-%attr(755,roor,root) %{_libexecdir}/srp_daemon/start_on_all_ports
+%attr(755,root,root) %{_libexecdir}/srp_daemon/start_on_all_ports
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/srp_daemon.conf
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/rdma/modules/srp_daemon.conf
 %attr(754,root,root) /etc/rc.d/init.d/srpd
