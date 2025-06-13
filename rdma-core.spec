@@ -9,13 +9,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	56.1
-Release:	2
+Version:	57.0
+Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	a4086d5f85cad79218d4bc627a09c8af
+# Source0-md5:	87a798080d1b6d85739c02d352e2ad63
 Source1:	libibverbs.pc.in
 Source2:	librdmacm.pc.in
 Patch0:		%{name}-static.patch
@@ -56,7 +56,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav34
+%define		ibv_abi		rdmav57
 
 %description
 This is the userspace components for the Linux Kernel's

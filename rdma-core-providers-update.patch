@@ -1,6 +1,18 @@
---- rdma-core-28.0/providers/cxgb3/iwch.c.orig	2020-02-12 21:21:08.971189494 +0100
-+++ rdma-core-28.0/providers/cxgb3/iwch.c	2020-02-12 21:28:50.972019955 +0100
-@@ -75,6 +75,14 @@
+--- rdma-core-37.1/providers/cxgb3/iwch.h.orig	2021-10-23 21:31:34.732657063 +0200
++++ rdma-core-37.1/providers/cxgb3/iwch.h	2021-10-24 08:37:17.256269862 +0200
+@@ -143,7 +143,8 @@ static inline unsigned long long_log2(un
+ }
+ 
+ extern int iwch_query_device(struct ibv_context *context,
+-			     struct ibv_device_attr *attr);
++			     const struct ibv_query_device_ex_input *input,
++			     struct ibv_device_attr_ex *attr, size_t attr_size);
+ extern int iwch_query_port(struct ibv_context *context, uint8_t port,
+ 			   struct ibv_port_attr *attr);
+ 
+--- rdma-core-57.0/providers/cxgb3/iwch.c.orig	2025-06-13 18:26:44.577307909 +0200
++++ rdma-core-57.0/providers/cxgb3/iwch.c	2025-06-13 18:31:58.675606292 +0200
+@@ -75,8 +75,16 @@ static const struct verbs_match_ent hca_
  	{},
  };
  
@@ -13,9 +25,12 @@
 +}
 +
  static const struct verbs_context_ops iwch_ctx_common_ops = {
- 	.query_device = iwch_query_device,
+-	.query_device = iwch_query_device,
++	.query_device_ex = iwch_query_device,
  	.query_port = iwch_query_port,
-@@ -98,6 +106,7 @@
+ 	.alloc_pd = iwch_alloc_pd,
+ 	.dealloc_pd = iwch_free_pd,
+@@ -98,6 +106,7 @@ static const struct verbs_context_ops iw
  	.detach_mcast = iwch_detach_mcast,
  	.post_srq_recv = iwch_post_srq_recv,
  	.req_notify_cq = iwch_arm_cq,
@@ -23,7 +38,16 @@
  };
  
  static const struct verbs_context_ops iwch_ctx_t3a_ops = {
-@@ -160,14 +169,6 @@
+@@ -132,7 +141,7 @@ static struct verbs_context *iwch_alloc_
+ 		return NULL;
+ 
+ 	if (ibv_cmd_get_context(&context->ibv_ctx, &cmd, sizeof cmd,
+-				&resp.ibv_resp, sizeof resp))
++				NULL, &resp.ibv_resp, sizeof resp))
+ 		goto err_free;
+ 
+ 	verbs_set_ops(&context->ibv_ctx, &iwch_ctx_common_ops);
+@@ -160,14 +169,6 @@ err_free:
  	return NULL;
  }
  
@@ -38,125 +62,7 @@
  static void iwch_uninit_device(struct verbs_device *verbs_device)
  {
  	struct iwch_device *dev = to_iwch_dev(&verbs_device->device);
-@@ -264,6 +265,5 @@
- 	.alloc_device = iwch_device_alloc,
- 	.uninit_device = iwch_uninit_device,
- 	.alloc_context = iwch_alloc_context,
--	.free_context = iwch_free_context,
- };
- PROVIDER_DRIVER(cxgb3, iwch_dev_ops);
---- rdma-core-28.0/providers/nes/nes_umain.c.orig	2020-02-12 22:09:28.778813223 +0100
-+++ rdma-core-28.0/providers/nes/nes_umain.c	2020-02-13 16:19:10.874608034 +0100
-@@ -63,6 +63,18 @@
- 	{},
- };
- 
-+/**
-+ * nes_ufree_context
-+ */
-+static void nes_ufree_context(struct ibv_context *ibctx)
-+{
-+	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
-+	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
-+
-+	verbs_uninit_context(&nesvctx->ibv_ctx);
-+	free(nesvctx);
-+}
-+
- static const struct verbs_context_ops nes_uctx_ops = {
- 	.query_device = nes_uquery_device,
- 	.query_port = nes_uquery_port,
-@@ -87,6 +99,7 @@
- 	.attach_mcast = nes_uattach_mcast,
- 	.detach_mcast = nes_udetach_mcast,
--	.async_event = nes_async_event
-+	.async_event = nes_async_event,
-+	.free_context = nes_ufree_context,
- };
- 
- static const struct verbs_context_ops nes_uctx_no_db_ops = {
-@@ -163,18 +176,6 @@
- }
- 
- 
--/**
-- * nes_ufree_context
-- */
--static void nes_ufree_context(struct ibv_context *ibctx)
--{
--	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
--	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
--
--	verbs_uninit_context(&nesvctx->ibv_ctx);
--	free(nesvctx);
--}
--
- static void nes_uninit_device(struct verbs_device *verbs_device)
- {
- 	struct nes_udevice *dev = to_nes_udev(&verbs_device->device);
-@@ -215,6 +216,5 @@
- 	.alloc_device = nes_device_alloc,
- 	.uninit_device = nes_uninit_device,
- 	.alloc_context = nes_ualloc_context,
--	.free_context = nes_ufree_context,
- };
- PROVIDER_DRIVER(nes, nes_udev_ops);
---- rdma-core-37.1/providers/cxgb3/iwch.h.orig	2021-10-23 21:31:34.732657063 +0200
-+++ rdma-core-37.1/providers/cxgb3/iwch.h	2021-10-24 08:37:17.256269862 +0200
-@@ -143,7 +143,8 @@ static inline unsigned long long_log2(un
- }
- 
- extern int iwch_query_device(struct ibv_context *context,
--			     struct ibv_device_attr *attr);
-+			     const struct ibv_query_device_ex_input *input,
-+			     struct ibv_device_attr_ex *attr, size_t attr_size);
- extern int iwch_query_port(struct ibv_context *context, uint8_t port,
- 			   struct ibv_port_attr *attr);
- 
---- rdma-core-37.1/providers/cxgb3/verbs.c.orig	2021-10-23 21:31:34.735990379 +0200
-+++ rdma-core-37.1/providers/cxgb3/verbs.c	2021-10-24 09:00:27.472071750 +0200
-@@ -42,23 +42,24 @@
- #include "iwch.h"
- #include "iwch-abi.h"
- 
--int iwch_query_device(struct ibv_context *context, struct ibv_device_attr *attr)
-+int iwch_query_device(struct ibv_context *context, const struct ibv_query_device_ex_input *input, struct ibv_device_attr_ex *attr, size_t attr_size)
- {
--	struct ibv_query_device cmd;
-+	struct ib_uverbs_ex_query_device_resp resp;
-+	size_t resp_size = sizeof(resp);
- 	uint64_t raw_fw_ver;
- 	unsigned major, minor, sub_minor;
- 	int ret;
- 
--	ret = ibv_cmd_query_device(context, attr, &raw_fw_ver, &cmd, 
--	  			   sizeof cmd);
-+	ret = ibv_cmd_query_device_any(context, input, attr, attr_size, &resp, &resp_size);
- 	if (ret)
- 		return ret;
- 
-+	raw_fw_ver = resp.base.fw_ver;
- 	major = (raw_fw_ver >> 32) & 0xffff;
- 	minor = (raw_fw_ver >> 16) & 0xffff;
- 	sub_minor = raw_fw_ver & 0xffff;
- 
--	snprintf(attr->fw_ver, sizeof attr->fw_ver,
-+	snprintf(attr->orig_attr.fw_ver, 64,
- 		 "%d.%d.%d", major, minor, sub_minor);
- 
- 	return 0;
---- rdma-core-37.1/providers/cxgb3/iwch.c.orig	2021-10-23 21:31:35.429319956 +0200
-+++ rdma-core-37.1/providers/cxgb3/iwch.c	2021-10-25 18:20:12.958721287 +0200
-@@ -84,7 +84,7 @@ static void iwch_free_context(struct ibv
- }
- 
- static const struct verbs_context_ops iwch_ctx_common_ops = {
--	.query_device = iwch_query_device,
-+	.query_device_ex = iwch_query_device,
- 	.query_port = iwch_query_port,
- 	.alloc_pd = iwch_alloc_pd,
- 	.dealloc_pd = iwch_free_pd,
-@@ -185,35 +185,6 @@ static bool iwch_device_match(struct ver
+@@ -184,35 +185,6 @@ static bool iwch_device_match(struct ver
  	if (!sysfs_dev->match)
  		return false;
  
@@ -192,17 +98,45 @@
  	return true;
  }
  
---- rdma-core-37.1/providers/nes/nes_umain.c.orig	2021-10-23 21:31:35.429319956 +0200
-+++ rdma-core-37.1/providers/nes/nes_umain.c	2021-10-25 20:11:56.505738392 +0200
-@@ -76,7 +76,7 @@ static void nes_ufree_context(struct ibv
- }
+@@ -264,6 +236,5 @@ static const struct verbs_device_ops iwc
+ 	.alloc_device = iwch_device_alloc,
+ 	.uninit_device = iwch_uninit_device,
+ 	.alloc_context = iwch_alloc_context,
+-	.free_context = iwch_free_context,
+ };
+ PROVIDER_DRIVER(cxgb3, iwch_dev_ops);
+--- rdma-core-37.1/providers/cxgb3/verbs.c.orig	2021-10-23 21:31:34.735990379 +0200
++++ rdma-core-37.1/providers/cxgb3/verbs.c	2021-10-24 09:00:27.472071750 +0200
+@@ -42,23 +42,24 @@
+ #include "iwch.h"
+ #include "iwch-abi.h"
  
- static const struct verbs_context_ops nes_uctx_ops = {
--	.query_device = nes_uquery_device,
-+	.query_device_ex = nes_uquery_device,
- 	.query_port = nes_uquery_port,
- 	.alloc_pd = nes_ualloc_pd,
- 	.dealloc_pd = nes_ufree_pd,
+-int iwch_query_device(struct ibv_context *context, struct ibv_device_attr *attr)
++int iwch_query_device(struct ibv_context *context, const struct ibv_query_device_ex_input *input, struct ibv_device_attr_ex *attr, size_t attr_size)
+ {
+-	struct ibv_query_device cmd;
++	struct ib_uverbs_ex_query_device_resp resp;
++	size_t resp_size = sizeof(resp);
+ 	uint64_t raw_fw_ver;
+ 	unsigned major, minor, sub_minor;
+ 	int ret;
+ 
+-	ret = ibv_cmd_query_device(context, attr, &raw_fw_ver, &cmd, 
+-	  			   sizeof cmd);
++	ret = ibv_cmd_query_device_any(context, input, attr, attr_size, &resp, &resp_size);
+ 	if (ret)
+ 		return ret;
+ 
++	raw_fw_ver = resp.base.fw_ver;
+ 	major = (raw_fw_ver >> 32) & 0xffff;
+ 	minor = (raw_fw_ver >> 16) & 0xffff;
+ 	sub_minor = raw_fw_ver & 0xffff;
+ 
+-	snprintf(attr->fw_ver, sizeof attr->fw_ver,
++	snprintf(attr->orig_attr.fw_ver, 64,
+ 		 "%d.%d.%d", major, minor, sub_minor);
+ 
+ 	return 0;
 --- rdma-core-37.1/providers/nes/nes_umain.h.orig	2021-10-23 21:31:34.749323640 +0200
 +++ rdma-core-37.1/providers/nes/nes_umain.h	2021-10-25 20:13:09.838674447 +0200
 @@ -346,7 +346,7 @@ static inline struct nes_uqp *to_nes_uqp
@@ -214,6 +148,75 @@
  int nes_uquery_port(struct ibv_context *, uint8_t, struct ibv_port_attr *);
  struct ibv_pd *nes_ualloc_pd(struct ibv_context *);
  int nes_ufree_pd(struct ibv_pd *);
+--- rdma-core-57.0/providers/nes/nes_umain.c.orig	2025-06-13 18:26:44.567307963 +0200
++++ rdma-core-57.0/providers/nes/nes_umain.c	2025-06-13 18:36:19.164195104 +0200
+@@ -63,8 +63,20 @@ static const struct verbs_match_ent hca_
+ 	{},
+ };
+ 
++/**
++ * nes_ufree_context
++ */
++static void nes_ufree_context(struct ibv_context *ibctx)
++{
++	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
++	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
++
++	verbs_uninit_context(&nesvctx->ibv_ctx);
++	free(nesvctx);
++}
++
+ static const struct verbs_context_ops nes_uctx_ops = {
+-	.query_device = nes_uquery_device,
++	.query_device_ex = nes_uquery_device,
+ 	.query_port = nes_uquery_port,
+ 	.alloc_pd = nes_ualloc_pd,
+ 	.dealloc_pd = nes_ufree_pd,
+@@ -86,7 +98,8 @@ static const struct verbs_context_ops ne
+ 	.destroy_ah = nes_udestroy_ah,
+ 	.attach_mcast = nes_uattach_mcast,
+ 	.detach_mcast = nes_udetach_mcast,
+-	.async_event = nes_async_event
++	.async_event = nes_async_event,
++	.free_context = nes_ufree_context,
+ };
+ 
+ static const struct verbs_context_ops nes_uctx_no_db_ops = {
+@@ -118,7 +131,7 @@ static struct verbs_context *nes_ualloc_
+ 	cmd.userspace_ver = NES_ABI_USERSPACE_VER;
+ 
+ 	if (ibv_cmd_get_context(&nesvctx->ibv_ctx, (struct ibv_get_context *)&cmd, sizeof cmd,
+-				&resp.ibv_resp, sizeof(resp)))
++				NULL, &resp.ibv_resp, sizeof(resp)))
+ 		goto err_free;
+ 
+ 	if (resp.kernel_ver != NES_ABI_KERNEL_VER) {
+@@ -163,18 +176,6 @@ err_free:
+ }
+ 
+ 
+-/**
+- * nes_ufree_context
+- */
+-static void nes_ufree_context(struct ibv_context *ibctx)
+-{
+-	struct nes_uvcontext *nesvctx = to_nes_uctx(ibctx);
+-	nes_ufree_pd(&nesvctx->nesupd->ibv_pd);
+-
+-	verbs_uninit_context(&nesvctx->ibv_ctx);
+-	free(nesvctx);
+-}
+-
+ static void nes_uninit_device(struct verbs_device *verbs_device)
+ {
+ 	struct nes_udevice *dev = to_nes_udev(&verbs_device->device);
+@@ -215,6 +216,5 @@ static const struct verbs_device_ops nes
+ 	.alloc_device = nes_device_alloc,
+ 	.uninit_device = nes_uninit_device,
+ 	.alloc_context = nes_ualloc_context,
+-	.free_context = nes_ufree_context,
+ };
+ PROVIDER_DRIVER(nes, nes_udev_ops);
 --- rdma-core-37.1/providers/nes/nes_uverbs.c.orig	2021-10-23 21:31:34.749323640 +0200
 +++ rdma-core-37.1/providers/nes/nes_uverbs.c	2021-10-25 20:17:56.213789687 +0200
 @@ -74,22 +74,23 @@ struct nes_ud_recv_wr {
