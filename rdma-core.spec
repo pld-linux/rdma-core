@@ -1,6 +1,5 @@
 # TODO:
 # - PLDify SysV init scripts
-# - drop ibverbs.pc and rdmacm.pc when not used by other packages
 #
 # Conditional build:
 %bcond_without	static_libs	# static libraries
@@ -9,15 +8,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	58.0
+Version:	58.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	2878225fe4144896546462b7782ef36f
-Source1:	libibverbs.pc.in
-Source2:	librdmacm.pc.in
+# Source0-md5:	9a8778c4aff550a580239fde03ef3244
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -1234,17 +1231,6 @@ rm -rf $RPM_BUILD_ROOT
 %py3_ocomp $RPM_BUILD_ROOT%{py3_sitedir}/pyverbs
 %endif
 
-# TODO: drop when other packages switch to upstream compatible lib{ibverbs,rdmacm}.pc
-# check if not present already
-[ ! -f $RPM_BUILD_ROOT%{_pkgconfigdir}/ibverbs.pc ] || exit 1
-sed -e 's,@prefix@,%{_prefix},;
-	s,@libdir@,%{_libdir},;
-	s,@LIBVERSION@,%{version},' %{SOURCE1} >$RPM_BUILD_ROOT%{_pkgconfigdir}/ibverbs.pc
-[ ! -f $RPM_BUILD_ROOT%{_pkgconfigdir}/rdmacm.pc ] || exit 1
-sed -e 's,@prefix@,%{_prefix},;
-	s,@libdir@,%{_libdir},;
-	s,@LIBVERSION@,%{version},' %{SOURCE2} >$RPM_BUILD_ROOT%{_pkgconfigdir}/rdmacm.pc
-
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/{MAINTAINERS,*.md,70-persistent-ipoib.rules}
 
@@ -1314,14 +1300,14 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs
 %defattr(644,root,root,755)
 %doc COPYING.BSD_FB COPYING.BSD_MIT COPYING.md MAINTAINERS README.md Documentation/{libibverbs,tag_matching}.md
-%attr(755,root,root) %{_libdir}/libibverbs.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libibverbs.so.1
+%{_libdir}/libibverbs.so.*.*.*
+%ghost %{_libdir}/libibverbs.so.1
 %dir %{_libdir}/libibverbs
 %dir %{_sysconfdir}/libibverbs.d
 
 %files -n libibverbs-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs.so
+%{_libdir}/libibverbs.so
 %dir %{_includedir}/infiniband
 %{_includedir}/infiniband/arch.h
 %{_includedir}/infiniband/ib_user_ioctl_verbs.h
@@ -1332,8 +1318,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/infiniband/verbs.h
 %{_includedir}/infiniband/verbs_api.h
 %{_pkgconfigdir}/libibverbs.pc
-# backward compat
-%{_pkgconfigdir}/ibverbs.pc
 %{_mandir}/man3/ibv_*.3*
 %{_mandir}/man3/mbps_to_ibv_rate.3*
 %{_mandir}/man3/mult_to_ibv_rate.3*
@@ -1351,7 +1335,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-bnxt_re
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libbnxt_re-%{ibv_abi}.so
+%{_libdir}/libibverbs/libbnxt_re-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/bnxt_re.driver
 
 %if %{with static_libs}
@@ -1362,7 +1346,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-cxgb3
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libcxgb3-%{ibv_abi}.so
+%{_libdir}/libibverbs/libcxgb3-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/cxgb3.driver
 
 %if %{with static_libs}
@@ -1373,7 +1357,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-cxgb4
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libcxgb4-%{ibv_abi}.so
+%{_libdir}/libibverbs/libcxgb4-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/cxgb4.driver
 
 %if %{with static_libs}
@@ -1384,17 +1368,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-efa
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libefa-%{ibv_abi}.so
+%{_libdir}/libibverbs/libefa-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/efa.driver
 
 %files -n libibverbs-driver-efa-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libefa.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libefa.so.1
+%{_libdir}/libefa.so.*.*.*
+%ghost %{_libdir}/libefa.so.1
 
 %files -n libibverbs-driver-efa-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libefa.so
+%{_libdir}/libefa.so
 %{_includedir}/infiniband/efadv.h
 %{_pkgconfigdir}/libefa.pc
 %{_mandir}/man3/efadv_create_driver_qp.3*
@@ -1412,7 +1396,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-erdma
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/liberdma-%{ibv_abi}.so
+%{_libdir}/libibverbs/liberdma-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/erdma.driver
 
 %if %{with static_libs}
@@ -1423,7 +1407,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-hfi1verbs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libhfi1verbs-%{ibv_abi}.so
+%{_libdir}/libibverbs/libhfi1verbs-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/hfi1verbs.driver
 
 %if %{with static_libs}
@@ -1434,17 +1418,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-hns
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libhns-%{ibv_abi}.so
+%{_libdir}/libibverbs/libhns-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/hns.driver
 
 %files -n libibverbs-driver-hns-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libhns.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libhns.so.1
+%{_libdir}/libhns.so.*.*.*
+%ghost %{_libdir}/libhns.so.1
 
 %files -n libibverbs-driver-hns-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libhns.so
+%{_libdir}/libhns.so
 %{_includedir}/infiniband/hnsdv.h
 %{_pkgconfigdir}/libhns.pc
 %{_mandir}/man3/hnsdv_*.3*
@@ -1459,7 +1443,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-ipathverbs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libexecdir}/truescale-serdes.cmds
-%attr(755,root,root) %{_libdir}/libibverbs/libipathverbs-%{ibv_abi}.so
+%{_libdir}/libibverbs/libipathverbs-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/ipathverbs.driver
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/truescale.conf
 
@@ -1471,7 +1455,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-irdma
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libirdma-%{ibv_abi}.so
+%{_libdir}/libibverbs/libirdma-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/irdma.driver
 
 %if %{with static_libs}
@@ -1482,17 +1466,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-mana
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libmana-%{ibv_abi}.so
+%{_libdir}/libibverbs/libmana-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/mana.driver
 
 %files -n libibverbs-driver-mana-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmana.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libmana.so.1
+%{_libdir}/libmana.so.*.*.*
+%ghost %{_libdir}/libmana.so.1
 
 %files -n libibverbs-driver-mana-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmana.so
+%{_libdir}/libmana.so
 %{_includedir}/infiniband/manadv.h
 %{_pkgconfigdir}/libmana.pc
 %{_mandir}/man3/manadv_*.3*
@@ -1506,18 +1490,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-mlx4
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libmlx4-%{ibv_abi}.so
+%{_libdir}/libibverbs/libmlx4-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/mlx4.driver
 /etc/modprobe.d/mlx4.conf
 
 %files -n libibverbs-driver-mlx4-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmlx4.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libmlx4.so.1
+%{_libdir}/libmlx4.so.*.*.*
+%ghost %{_libdir}/libmlx4.so.1
 
 %files -n libibverbs-driver-mlx4-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmlx4.so
+%{_libdir}/libmlx4.so
 %{_includedir}/infiniband/mlx4dv.h
 %{_pkgconfigdir}/libmlx4.pc
 %{_mandir}/man3/mlx4dv_*.3*
@@ -1531,17 +1515,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-mlx5
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libmlx5-%{ibv_abi}.so
+%{_libdir}/libibverbs/libmlx5-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/mlx5.driver
 
 %files -n libibverbs-driver-mlx5-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmlx5.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libmlx5.so.1
+%{_libdir}/libmlx5.so.*.*.*
+%ghost %{_libdir}/libmlx5.so.1
 
 %files -n libibverbs-driver-mlx5-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmlx5.so
+%{_libdir}/libmlx5.so
 %{_includedir}/infiniband/mlx5_api.h
 %{_includedir}/infiniband/mlx5_user_ioctl_verbs.h
 %{_includedir}/infiniband/mlx5dv.h
@@ -1557,7 +1541,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-mthca
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libmthca-%{ibv_abi}.so
+%{_libdir}/libibverbs/libmthca-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/mthca.driver
 
 %if %{with static_libs}
@@ -1568,7 +1552,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-nes
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libnes-%{ibv_abi}.so
+%{_libdir}/libibverbs/libnes-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/nes.driver
 
 %if %{with static_libs}
@@ -1579,7 +1563,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-ocrdma
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libocrdma-%{ibv_abi}.so
+%{_libdir}/libibverbs/libocrdma-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/ocrdma.driver
 
 %if %{with static_libs}
@@ -1590,7 +1574,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-qedr
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libqedr-%{ibv_abi}.so
+%{_libdir}/libibverbs/libqedr-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/qedr.driver
 
 %if %{with static_libs}
@@ -1602,7 +1586,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-rxe
 %defattr(644,root,root,755)
 %doc Documentation/rxe.md
-%attr(755,root,root) %{_libdir}/libibverbs/librxe-%{ibv_abi}.so
+%{_libdir}/libibverbs/librxe-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/rxe.driver
 %{_mandir}/man7/rxe.7*
 
@@ -1614,7 +1598,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-siw
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libsiw-%{ibv_abi}.so
+%{_libdir}/libibverbs/libsiw-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/siw.driver
 
 %if %{with static_libs}
@@ -1625,7 +1609,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibverbs-driver-vmw_pvrdma
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibverbs/libvmw_pvrdma-%{ibv_abi}.so
+%{_libdir}/libibverbs/libvmw_pvrdma-%{ibv_abi}.so
 %{_sysconfdir}/libibverbs.d/vmw_pvrdma.driver
 
 %if %{with static_libs}
@@ -1637,22 +1621,20 @@ rm -rf $RPM_BUILD_ROOT
 %files -n librdmacm
 %defattr(644,root,root,755)
 %doc Documentation/librdmacm.md
-%attr(755,root,root) %{_libdir}/librdmacm.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/librdmacm.so.1
+%{_libdir}/librdmacm.so.*.*.*
+%ghost %{_libdir}/librdmacm.so.1
 %dir %{_libdir}/rsocket
-%attr(755,root,root) %{_libdir}/rsocket/librspreload.so*
+%{_libdir}/rsocket/librspreload.so*
 
 %files -n librdmacm-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/librdmacm.so
+%{_libdir}/librdmacm.so
 %{_includedir}/infiniband/ib.h
 %{_includedir}/rdma/rdma_cma.h
 %{_includedir}/rdma/rdma_cma_abi.h
 %{_includedir}/rdma/rdma_verbs.h
 %{_includedir}/rdma/rsocket.h
 %{_pkgconfigdir}/librdmacm.pc
-# backward compat
-%{_pkgconfigdir}/rdmacm.pc
 %{_mandir}/man3/rdma_*.3*
 %{_mandir}/man7/rdma_cm.7*
 %{_mandir}/man7/rsocket.7*
@@ -1694,12 +1676,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibumad
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibumad.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libibumad.so.3
+%{_libdir}/libibumad.so.*.*.*
+%ghost %{_libdir}/libibumad.so.3
 
 %files -n libibumad-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibumad.so
+%{_libdir}/libibumad.so
 %{_includedir}/infiniband/umad*.h
 %{_pkgconfigdir}/libibumad.pc
 %{_mandir}/man3/umad_*.3*
@@ -1712,12 +1694,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n libibmad
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibmad.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libibmad.so.5
+%{_libdir}/libibmad.so.*.*.*
+%ghost %{_libdir}/libibmad.so.5
 
 %files -n libibmad-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibmad.so
+%{_libdir}/libibmad.so
 %{_includedir}/infiniband/mad.h
 %{_includedir}/infiniband/mad_osd.h
 %{_pkgconfigdir}/libibmad.pc
@@ -1734,7 +1716,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/ib_acme
 %attr(755,root,root) %{_sbindir}/ibacm
 %dir %{_libdir}/ibacm
-%attr(755,root,root) %{_libdir}/ibacm/libibacmp.so
+%{_libdir}/ibacm/libibacmp.so
 %attr(754,root,root) /etc/rc.d/init.d/ibacm
 %{systemdunitdir}/ibacm.service
 %{systemdunitdir}/ibacm.socket
@@ -1818,12 +1800,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n infiniband-diags-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibnetdisc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libibnetdisc.so.5
+%{_libdir}/libibnetdisc.so.*.*.*
+%ghost %{_libdir}/libibnetdisc.so.5
 
 %files -n infiniband-diags-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libibnetdisc.so
+%{_libdir}/libibnetdisc.so
 %{_includedir}/infiniband/ibnetdisc.h
 %{_includedir}/infiniband/ibnetdisc_osd.h
 %{_pkgconfigdir}/libibnetdisc.pc
