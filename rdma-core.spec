@@ -8,13 +8,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	58.1
+Version:	59.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	9a8778c4aff550a580239fde03ef3244
+# Source0-md5:	13f0917f5501026f1a313b469b6ad7c3
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -53,7 +53,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav57
+%define		ibv_abi		rdmav59
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -1384,8 +1384,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/efadv_create_driver_qp.3*
 %{_mandir}/man3/efadv_create_qp_ex.3*
 %{_mandir}/man3/efadv_query_ah.3*
+%{_mandir}/man3/efadv_query_cq.3*
 %{_mandir}/man3/efadv_query_device.3*
 %{_mandir}/man3/efadv_query_mr.3*
+%{_mandir}/man3/efadv_query_qp_wqs.3*
 %{_mandir}/man7/efadv.7*
 
 %if %{with static_libs}
