@@ -3,18 +3,18 @@
 #
 # Conditional build:
 %bcond_without	static_libs	# static libraries
-%bcond_without	systemd		# systemd
+%bcond_without	systemd		# systemd support
 
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	59.1
+Version:	60.1
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	13f0917f5501026f1a313b469b6ad7c3
+# Source0-md5:	ed60e60f80f004ae3a21e1a34578acf7
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -42,8 +42,8 @@ BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-modules >= 1:3.2
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.605
-BuildRequires:	udev-devel
 %{?with_systemd:BuildRequires:	systemd-devel}
+BuildRequires:	udev-devel
 Requires:	ibacm = %{version}-%{release}
 Requires:	iwpmd = %{version}-%{release}
 Requires:	rdma-boot = %{version}-%{release}
