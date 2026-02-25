@@ -8,13 +8,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	60.1
+Version:	61.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	ed60e60f80f004ae3a21e1a34578acf7
+# Source0-md5:	3fc29763f84f562c0d4c82b5179a6ada
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -42,6 +42,7 @@ BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-modules >= 1:3.2
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.605
+BuildRequires:	sed >= 4.0
 %{?with_systemd:BuildRequires:	systemd-devel}
 BuildRequires:	udev-devel
 Requires:	ibacm = %{version}-%{release}
@@ -71,8 +72,9 @@ included with support for the following Kernel RDMA drivers:
  - iw_cxgb3.ko
  - iw_cxgb4.ko
  - hfi1.ko
- - hns-roce.ko
+ - hns-roce-hw-v2.ko
  - ib_qib.ko
+ - ionic_rdma.ko
  - irdma.ko
  - mana_ib.ko
  - mlx4_ib.ko
@@ -106,8 +108,9 @@ libibverbs w jądrze dla następujących sterowników RDMA z jądra:
  - iw_cxgb3.ko
  - iw_cxgb4.ko
  - hfi1.ko
- - hns-roce.ko
+ - hns-roce-hw-v2.ko
  - ib_qib.ko
+ - ionic_rdma.ko
  - irdma.ko
  - mana_ib.ko
  - mlx4_ib.ko
@@ -454,6 +457,57 @@ application.
 
 %description -n libibverbs-driver-hns-static -l pl.UTF-8
 Statyczna wersja sterownika hns, którą można wbudować bezpośrednio w
+aplikację.
+
+%package -n libibverbs-driver-ionic
+Summary:	Userspace driver for AMD Pensando devices
+Summary(pl.UTF-8):	Sterownik przestrzeni użytkownika dla urządzeń AMD Pensando
+Group:		Libraries
+Requires:	libibverbs-driver-ionic-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-ionic
+Userspace driver for AMD Pensando devices.
+
+%description -n libibverbs-driver-ionic -l pl.UTF-8
+Sterownik przestrzeni użytkownika dla urządzeń AMD Pensando.
+
+%package -n libibverbs-driver-ionic-libs
+Summary:	Shared library for AMD Pensando devices
+Summary(pl.UTF-8):	Biblioteka współdzielona dla urządzeń AMD Pensando
+Group:		Libraries
+Requires:	libibverbs = %{version}-%{release}
+
+%description -n libibverbs-driver-ionic-libs
+Shared library for AMD Pensando devices.
+
+%description -n libibverbs-driver-ionic-libs -l pl.UTF-8
+Biblioteka współdzielona dla urządzeń AMD Pensando.
+
+%package -n libibverbs-driver-ionic-devel
+Summary:	Header files for AMD Pensando devices library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki dla urządzeń AMD Pensando
+Group:		Development/Libraries
+Requires:	libibverbs-devel = %{version}-%{release}
+Requires:	libibverbs-driver-ionic-libs = %{version}-%{release}
+
+%description -n libibverbs-driver-ionic-devel
+Header files for AMD Pensando devices library.
+
+%description -n libibverbs-driver-ionic-devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki dla urządzeń AMD Pensando.
+
+%package -n libibverbs-driver-ionic-static
+Summary:	Static version of ionic driver
+Summary(pl.UTF-8):	Statyczna wersja sterownika ionic
+Group:		Development/Libraries
+Requires:	libibverbs-static = %{version}-%{release}
+
+%description -n libibverbs-driver-ionic-static
+Static version of ionic driver, which may be linked directly into
+application.
+
+%description -n libibverbs-driver-ionic-static -l pl.UTF-8
+Statyczna wersja sterownika ionic, którą można wbudować bezpośrednio w
 aplikację.
 
 %package -n libibverbs-driver-ipathverbs
@@ -1197,6 +1251,8 @@ Pyverbs to oparte na Cythonie API Pythona do libibverbs, zapewniające
 %patch -P3 -R -p1
 %patch -P4 -p1
 
+%{__sed} -i -e '1s,/usr/bin/env python3,%{__python3},' kernel-boot/rdma_topo
+
 %build
 install -d build
 cd build
@@ -1246,6 +1302,9 @@ rm -rf $RPM_BUILD_ROOT
 %post	-n libibverbs-driver-hns-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-hns-libs -p /sbin/ldconfig
 
+%post	-n libibverbs-driver-ionic-libs -p /sbin/ldconfig
+%postun	-n libibverbs-driver-ionic-libs -p /sbin/ldconfig
+
 %post	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
 %postun	-n libibverbs-driver-mana-libs -p /sbin/ldconfig
 
@@ -1274,6 +1333,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n rdma-boot
 %defattr(644,root,root,755)
 %doc Documentation/udev.md build/kernel-boot/persistent-ipoib.rules.in
+%attr(755,root,root) %{_sbindir}/rdma_topo
 %dir %{_sysconfdir}/rdma
 %dir %{_sysconfdir}/rdma/modules
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/rdma/modules/infiniband.conf
@@ -1440,6 +1500,28 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libibverbs-driver-hns-static
 %defattr(644,root,root,755)
 %{_libdir}/libhns.a
+%endif
+
+%files -n libibverbs-driver-ionic
+%defattr(644,root,root,755)
+%{_libdir}/libibverbs/libionic-%{ibv_abi}.so
+%{_sysconfdir}/libibverbs.d/ionic.driver
+
+%files -n libibverbs-driver-ionic-libs
+%defattr(644,root,root,755)
+%{_libdir}/libionic.so.*.*.*
+%ghost %{_libdir}/libionic.so.1
+
+%files -n libibverbs-driver-ionic-devel
+%defattr(644,root,root,755)
+%{_libdir}/libionic.so
+%{_includedir}/infiniband/ionic_dv.h
+%{_pkgconfigdir}/libionic.pc
+
+%if %{with static_libs}
+%files -n libibverbs-driver-ionic-static
+%defattr(644,root,root,755)
+%{_libdir}/libionic.a
 %endif
 
 %files -n libibverbs-driver-ipathverbs
