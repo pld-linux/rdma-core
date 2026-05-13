@@ -4,17 +4,19 @@
 # Conditional build:
 %bcond_without	static_libs	# static libraries
 %bcond_without	systemd		# systemd support
+%bcond_with	lttng		# lttng tracing (mutually exclusive with usdt)
+%bcond_with	usdt		# libbpf/USDT tracing (mutually exclusive with lttng)
 
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	61.0
+Version:	62.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	3fc29763f84f562c0d4c82b5179a6ada
+# Source0-md5:	4d90f2437cc9a7f87d9e33b3a4a3f3b1
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -32,6 +34,7 @@ BuildRequires:	libdrm-devel
 BuildRequires:	libnl-devel >= 3.2
 # <rdma/*> kernel interface
 BuildRequires:	linux-libc-headers >= 7:2.6.20
+%{?with_lttng:BuildRequires:	lttng-ust-devel}
 # if no buildlib/pandoc-prebuilt dir
 #BuildRequires:	pandoc
 BuildRequires:	pkgconfig
@@ -1266,6 +1269,9 @@ cd build
 	-DCMAKE_INSTALL_UDEV_RULESDIR=/lib/udev/rules.d \
 	-DDRM_INCLUDE_DIRS=/usr/include/libdrm \
 	%{?with_static_libs:-DENABLE_STATIC=ON} \
+%if %{with lttng} || %{with usdt}
+	-DTRACING=%{?with_lttng:LTTNG}%{?with_usdt:USDT} \
+%endif
 %if %{with python}
 	-DNO_PYVERBS=OFF \
 	-DPYTHON_EXECUTABLE:PATH=%{__python3}
