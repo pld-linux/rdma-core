@@ -10,13 +10,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	62.0
+Version:	63.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	4d90f2437cc9a7f87d9e33b3a4a3f3b1
+# Source0-md5:	361e67791daae1e4bfcae044812786b3
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -135,7 +135,11 @@ Są także demony dodatkowych usług:
 Summary:	RDMA systemd units and udev rules to initialize kernel modules
 Summary(pl.UTF-8):	Jednostki systemd i reguły udev do zainicjowania modułów jądra RDMA
 Group:		Base
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(postun):	/usr/sbin/groupdel
 Requires:	systemd-units
+Provides:	group(rdma)
 
 %description -n rdma-boot
 RDMA systemd units and udev rules to initialize kernel modules.
@@ -1299,6 +1303,14 @@ rm -rf $RPM_BUILD_ROOT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre -n rdma-boot
+%groupadd -g 267 rdma
+
+%postun -n rdma-boot
+if [ "$1" = "0" ]; then
+	%groupremove rdma
+fi
+
 %post	-n libibverbs -p /sbin/ldconfig
 %postun	-n libibverbs -p /sbin/ldconfig
 
@@ -1355,6 +1367,7 @@ rm -rf $RPM_BUILD_ROOT
 /lib/udev/rules.d/90-rdma-hw-modules.rules
 /lib/udev/rules.d/90-rdma-ulp-modules.rules
 /lib/udev/rules.d/90-rdma-umad.rules
+%{_sysusersdir}/rdma.conf
 
 %files -n rdma-ndd
 %defattr(644,root,root,755)
