@@ -10,13 +10,13 @@
 Summary:	RDMA Core Userspace Libraries and Daemons
 Summary(pl.UTF-8):	RDMA Core - biblioteki i demony przestrzeni użytkownika
 Name:		rdma-core
-Version:	63.0
+Version:	64.0
 Release:	1
 License:	BSD or GPL v2
 Group:		Applications/System
 #Source0Download: https://github.com/linux-rdma/rdma-core/releases
 Source0:	https://github.com/linux-rdma/rdma-core/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	361e67791daae1e4bfcae044812786b3
+# Source0-md5:	2e9093ea10150ecf4bbb8543a4fa5898
 Patch0:		%{name}-static.patch
 # restore cxgb3 and nes providers from rdma-core 26.1 (keep until dropping support for kernels < 5.5)
 # from https://github.com/linux-rdma/rdma-core/commit/c21a3cf5d9e4cef0904b4d47f1cb43be9efdbf90.patch cut down (to revert)
@@ -57,7 +57,7 @@ Requires:	systemd-units
 Requires:	udev-core
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		ibv_abi		rdmav59
+%define		ibv_abi		rdmav64
 
 %description
 This is the userspace components for the Linux Kernel's
@@ -1467,6 +1467,7 @@ fi
 %{_mandir}/man3/efadv_query_device.3*
 %{_mandir}/man3/efadv_query_mr.3*
 %{_mandir}/man3/efadv_query_qp_wqs.3*
+%{_mandir}/man3/efadv_wr_set_processing_hints.3*
 %{_mandir}/man7/efadv.7*
 
 %if %{with static_libs}
@@ -1536,6 +1537,13 @@ fi
 %{_libdir}/libionic.so
 %{_includedir}/infiniband/ionic_dv.h
 %{_pkgconfigdir}/libionic.pc
+%{_mandir}/man3/ionic_dv_ctx_get_udma_count.3*
+%{_mandir}/man3/ionic_dv_ctx_get_udma_mask.3*
+%{_mandir}/man3/ionic_dv_pd_get_udma_mask.3*
+%{_mandir}/man3/ionic_dv_pd_set_rqcmb.3*
+%{_mandir}/man3/ionic_dv_pd_set_sqcmb.3*
+%{_mandir}/man3/ionic_dv_pd_set_udma_mask.3*
+%{_mandir}/man7/ionicdv.7*
 
 %if %{with static_libs}
 %files -n libibverbs-driver-ionic-static
